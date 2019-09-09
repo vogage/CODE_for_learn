@@ -213,6 +213,74 @@ class Voc:
         for word in keep_words:
             self.addWord(word)
             
+#Now we can assemble our vocabulary and query/response sentence Pairs.Before we are ready
+#to use this data,we must perform some processing.
+            
+#First, we must convert the Unicode strings to ASCII using unicodeToAscii. Next,we should convert all letters
+#to lowercase and trim all non-letter characters execpt for basic punctuation(normalizeString).Finally , to 
+# aid in training convergence, we will filter out sentences with length greater than the MAX_LENGTH threshold(filterPairs)
+    
+MAX_LENGTH=10 # Maximum Sentence length to consider
+
+# Turn a Unicode string to plain ACSII, thanks to consider
+# https:\\stackoverflow.com/a/518232/2009427
+
+def unicodeToAscii(s):
+    return ' '.join(
+            c for c in unicodedata.normalize('NFD',s)
+            if unicodedata.category(c)!='Mn'
+            )
+    
+#Lowercase, trim, and remove non-letter characters
+def normalizeString(s):
+    s=unicodeToAscii(s.lower().strip())
+    s=re.sub(r"([.!?])",r" 1",s)
+    s=re.sub(r"[^a-zA-Z.!?]+",r" ",s)
+    s=re.sub(r"\s+",r" ",s).strip()
+    return s
+
+#Read query/response pairs and return a voc object
+def readVocs(datafile,corpus_name):
+    print("Reading lines...")
+    #Read the file and split into lines
+    lines=open(datafile,encoding='utf-8').\
+        read().strip().split('\n')
+    # Split every line into pairs and normalize
+    pairs=([normalizeString(s) for s in l.split('\t') for l in lines])
+    voc=Voc(corpus_name)
+    return voc,pairs
+
+#Returns True iff both sentences in a pair 'p' are under the MAX_LENGTH threshold
+def filterPair(p):
+    #Input sequences need to preserve the last word for EOS token
+    return len(p[0].split(' '))<MAX_LENGTH and len(p[1].split(' '))<MAX_LENGTH
+
+#Filter pairs using filterPair condition
+def filterPairs(pairs):
+    return [pair for pair in pairs if filterPair(pair)]
+
+#Using the functions defined above, return a populated voc object and pairs list
+def loadPrepareData(corpus,corpus_name,datafile,save_dir):
+    print("Start preparing training data...")
+    voc,pairs=readVocs(datafile,corpus_name)
+    print("Read {!s} sentence pairs".format(len(pairs)))
+    pairs=filterPairs(pairs)
+    print("Trimmed to {!s} sentence pairs".format(len(pairs)))
+    print("Counting words...")
+    for pair in pairs:
+        voc.addSentence(pair[0])
+        voc.addSentence(pair[1])
+    print("Counted words:",voc.num_words)
+    return voc,pairs
+
+#Load/Assemble voc and pairs
+save_dir=os.path.join("data","save")
+voc,pairs=loadPrepareData(corpus,corpus_name,datafile,save_dir)
+#Print some pairs to validate
+print("\npairs:")
+for pair in pairs[:10]:
+    print(pair)
+    
 
 
 
