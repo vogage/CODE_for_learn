@@ -1,6 +1,7 @@
 %this m file is used to show the figure after add error
 error=AC_R_test_origin_test_error_short_tool_length;
 n=length(ideal);
+global actual
 actual=zeros(n,3);
 for i=1:n
     actual(i,:)=ideal(i,:)+error(i,:);

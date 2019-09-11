@@ -5,6 +5,7 @@
 load("data/AC_R_test_origin_test_error.mat");
 
 % produce the data of according machine tool NC code
+global NC
 NC=NC_code_produce();
 
 % assume the tool length is 1, produce the ideal position of the tool point
