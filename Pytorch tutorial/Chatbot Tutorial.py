@@ -27,8 +27,9 @@ import itertools
 import math
 
 USE_CUDA=torch.cuda.is_available()
+print(USE_CUDA)
 device=torch.device("cuda" if USE_CUDA else "cpu")
-
+print(device)
 #Load&Preprocess Data
 
 # The next step is to reformat our data file and load the data into structures that we can work with
@@ -51,6 +52,7 @@ def printLines(file,n=10):
     for line in lines[:n]:
         print(line)
 
+print(corpus)
 printLines(os.path.join(corpus,"movie_lines.txt"))
 
 #Create formatted data file
@@ -71,6 +73,9 @@ def loadLines(fileName, fields):
             # Extract fields
             lineObj={}
             for i,field in enumerate(fields):
+            #MOVIE_LINES_FIELDS=["lineID","characterID","movieID","character","text"]
+            #    print("line:{}".format(i))
+            #    print("fiedld:{}".format(field))
                 lineObj[field]=values[i]
             lines[lineObj['lineID']]=lineObj
     return lines
@@ -78,12 +83,15 @@ def loadLines(fileName, fields):
  #Groups fields of lines from 'loadLines' into conversations based on *movie_conversations.txt*
 def loadConversations(fileName,lines,fields):
     conversations=[]
+    #count=1
     with open(fileName,'r',encoding='iso-8859-1')as f:
         for line in f:
+            #count=count+1
             values=line.split(" +++$+++ ")
              #Extract fields
             convObj={}
             for i,field in enumerate(fields):
+            #MOVIE_CONVERSATIONS_FIELDS=["character1ID","character2ID","movieID","utteranceIDs"]
                 convObj[field]=values[i]
                  #Convert string list (convObj["utteranceIDs"]=="['L598485','L598486',]")
             
@@ -92,11 +100,13 @@ def loadConversations(fileName,lines,fields):
             #print(utterance_id_pattern)
             
             lineIds=utterance_id_pattern.findall(convObj["utteranceIDs"])
+            #utterance: 用言语的表达; 说话; 话语; 言论
                  #Reassemble lines
             convObj["lines"]=[]
             for lineId in lineIds:
                 convObj["lines"].append(lines[lineId])
             conversations.append(convObj)
+    #print(count)
     return conversations
 
 
@@ -107,8 +117,20 @@ def extractSentencePairs(conversations):
     for conversation in conversations:
         #Iterate over all the lines of the conversation
         for i in range(len(conversation["lines"])-1): #We ignore the last line(no answer for it)
+            #print("len(inputLine):{}".format(len(conversation["lines"][i]["text"])))
             inputLine=conversation["lines"][i]["text"].strip()
+            #print("len(inputLine):{}".format(len(inputLine)))
+            #print("inputLine:{}".format(inputLine))
             targetLine=conversation["lines"][i+1]["text"].strip()
+#--------------------------------------------------------------------------
+#            str = "00000003210Runoob01230000000"; 
+#            print str.strip( '0' );  # 去除首尾字符 0
+# 
+# 
+#            str2 = "   Runoob      ";   # 去除首尾空格
+#            print str2.strip();
+#---------------------------------------------------------------------------------
+            #print("targetLine:{}".format(targetLine))
             #fileter wrong samples (if one of the lists is empty)
             if inputLine and targetLine:
                 qa_pairs.append([inputLine,targetLine])
@@ -119,10 +141,11 @@ def extractSentencePairs(conversations):
 #Define path to new file
 datafile=os.path.join(corpus,"formatted_movie_lines.txt")
 
-delimiter='\t'
+delimiter='\t' #delimiter: 定界符，分隔符;
+
 # Unescape the delimiter
 delimiter=str(codecs.decode(delimiter,"unicode_escape"))
-
+print("delimiter:{}".format(delimiter))
 # Initialize lines dict, conversations list, and field ids
 lines={}
 conversations=[]
@@ -182,6 +205,9 @@ class Voc:
             self.addWord(word)
             
     def addWord(self,word):
+        #print("word:{}".format(word))
+        #print("word2index:{}".format(self.word2index))
+        #print("word2count:{}".format(self.word2count))
         if word not in self.word2index:
             self.word2index[word]=self.num_words
             self.word2count[word]=1;
@@ -199,6 +225,7 @@ class Voc:
         keep_words=[]
         
         for k,v in self.word2count.items():
+            #print("word2count.items():{}".format(self.word2count.items()))
             if v>=min_count:
                 keep_words.append(k)
                 
@@ -236,6 +263,19 @@ def unicodeToAscii(s):
 #Lowercase, trim, and remove non-letter characters
 def normalizeString(s):
     s=unicodeToAscii(s.lower().strip())
+#--------------------------------------------------------------------------------
+#    re.sub(pattern, repl, string, count=0, flags=0)
+
+#       pattern：表示正则表达式中的模式字符串；
+
+#       repl：被替换的字符串（既可以是字符串，也可以是函数）；
+
+#       string：要被处理的，要被替换的字符串；
+
+#       count：匹配的次数, 默认是全部替换
+
+#       flags：具体用处不详
+#----------------------------------------------------------------------------------
     s=re.sub(r"([.!?])", r" \1",s)
     s=re.sub(r"[^a-zA-Z.!?]+",r" ",s)
     s=re.sub(r"\s+",r" ",s).strip()
@@ -273,6 +313,7 @@ def loadPrepareData(corpus,corpus_name,datafile,save_dir):
         voc.addSentence(pair[0])
         voc.addSentence(pair[1])
     print("Counted words:",voc.num_words)
+    print("Counted pairs:",len(pairs))
     return voc,pairs
 
 #Load/Assemble voc and pairs
@@ -305,6 +346,7 @@ def trimRareWords(voc,pairs,MIN_COUNT):
         keep_output=True
         #Check input sentence
         for word in input_sentence.split(' '):
+            #print("for word in input_sentence.split(' '):",word)
             if word not in voc.word2index:
                 keep_input=False
                 break
@@ -488,7 +530,7 @@ class EncoderRNN(nn.Module):
         
         #Initialize GRU; the input_size and hidden_size params are both set to 'hidden_size'
         # because our input size is a word embedding with number of features == hidden_size
-        self.gru=nn.GPU(hidden_size,hidden_size,n_layers,
+        self.gru=nn.GRU(hidden_size,hidden_size,n_layers,
                         dropout=(0 if n_layers == 1 else dropout),bidirectional=True)
         
     def forward(self,input_seq,input_lengths,hidden=None):
@@ -499,7 +541,7 @@ class EncoderRNN(nn.Module):
         #Forward pass through GRU
         outputs,hidden=self.gru(packed,hidden)
         #Unpack padding
-        outputs,_=nn.utils.rnn.pack_padded_sequence(outputs)
+        outputs,_=nn.utils.rnn.pad_packed_sequence(outputs)
         #Sum bidirectional GRU outputs
         outputs=outputs[:,:,:self.hidden_size]+outputs[:,:,self.hidden_size:]
         #Return output and final hidden state
@@ -562,7 +604,7 @@ class Attn(nn.Module):
         attn_energies=attn_energies.t()
         
         #Return the softmax normalized probability scores(with added dimension)
-        return F.softmax(attn_energies,dim=1).unsequeeze(1)
+        return F.softmax(attn_energies,dim=1).unsqueeze(1)
             
 #Outputs: output , hidden
 class LuongAttnDecoderRNN(nn.Module):
@@ -606,136 +648,136 @@ class LuongAttnDecoderRNN(nn.Module):
         return output,hidden
     
 
-    def maskNLLLoss(inp,target,mask):
-        nTotal=mask.sum()
-        crossEntropy=-torch.log(torch.gather(inp,1,target.view(-1,1)).squeeze(1))
-        loss=crossEntropy.masked_select(mask).mean()
-        loss=loss.to(device)
-        return loss,nTotal.item()             
+def maskNLLLoss(inp,target,mask):
+    nTotal=mask.sum()
+    crossEntropy=-torch.log(torch.gather(inp,1,target.view(-1,1)).squeeze(1))
+    loss=crossEntropy.masked_select(mask).mean()
+    loss=loss.to(device)
+    return loss,nTotal.item()             
+        
+def train(input_variable,lengths,target_variable,mask,max_target_len,encoder,decoder,embedding,
+          encoder_optimizer,decoder_optimizer,batch_size,clip,max_length=MAX_LENGTH):
+    #Zero gradients
+    encoder_optimizer.zero_grad()
+    decoder_optimizer.zero_grad()
+    
+    #Set device options
+    input_variable=input_variable.to(device)
+    lengths=lengths.to(device)
+    target_variable=target_variable.to(device)
+    mask=mask.to(device)
+    
+    #Initialize variable
+    loss=0
+    print_losses=[]
+    n_totals=0
+    
+    #Forward pass through encoder
+    encoder_outputs,encoder_hidden=encoder(input_variable,lengths)
+    
+    #Create initial decoder input(start with SOS tokens for each sentence)
+    decoder_input=torch.LongTensor([[SOS_token for _ in range(batch_size)]])
+    decoder_input=decoder_input.to(device)
+    
+    #Set initial decoder hidden state to the encoder's final hidden state
+    decoder_hidden=encoder_hidden[:decoder.n_layers]
+    
+    #Determine if we are using teacher forcing this iteration
+    use_teacher_forcing=True if random.random()<teacher_forcing_ratio else False
+    
+    #Forward batch of sequence through decoder one time step at a time
+    if use_teacher_forcing:
+        for t in range(max_target_len):
+            decoder_output,decoder_hidden=decoder(
+                    decoder_input,decoder_hidden,encoder_outputs)
+            #No teacher forcing: next input is decoder's own current output
+            _, topi=decoder_output.topk(1)
+            decoder_input=torch.LongTensor([[topi[i][0] for i in range(batch_size)]])
+            decoder_input=decoder_input.to(device)
+            #Calculate and accumlate loss
+            mask_loss,nTotal=maskNLLLoss(decoder_output,target_variable[t],mask[t])
+            loss+=mask_loss
+            print_losses.append(mask_loss.item()*nTotal)
+            n_totals+=nTotal
+    else:
+        for t in range(max_target_len):
+            decoder_output,decoder_hidden=decoder(decoder_input,decoder_hidden,encoder_outputs)
+            #No teacher forcing :next input is decoder's own current output
+            _,topi=decoder_output.topk(1)
+            decoder_input=torch.LongTensor([[topi[i][0]for i in range(batch_size)]])
+            decoder_input=decoder_input.to(device)
+            #Calculate and accumulate loss
+            mask_loss,nTotal=maskNLLLoss(decoder_output,target_variable[t],mask[t])
+            loss+=mask_loss
+            print_losses.append(mask_loss.item()*nTotal)
+            n_totals+=nTotal
             
-    def train(input_variable,lengths,target_variable,mask,max_target_len,encoder,decoder,embedding,
-              encoder_optimizer,decoder_optimizer,batch_size,clip,max_length=MAX_LENGTH):
-        #Zero gradients
-        encoder_optimizer.zero_grad()
-        decoder_optimizer.zero_grad()
-        
-        #Set device options
-        input_variable=input_variable.to(device)
-        lengths=lengths.to(device)
-        target_variable=target_variable.to(device)
-        mask=mask.to(device)
-        
-        #Initialize variable
-        loss=0
-        print_losses=[]
-        n_totals=0
-        
-        #Forward pass through encoder
-        encoder_outputs,encoder_hidden=encoder(input_variable,lengths)
-        
-        #Create initial decoder input(start with SOS tokens for each sentence)
-        decoder_input=torch.LongTensor([[SOS_token for _ in range(batch_size)]])
-        decoder_input=decoder_input.to(device)
-        
-        #Set initial decoder hidden state to the encoder's final hidden state
-        decoder_hidden=encoder_input.to(device)
-        
-        #Determine if we are using teacher forcing this iteration
-        use_teacher_forcing=True if random.random()<teacher_forcing_ratio else False
-        
-        #Forward batch of sequence through decoder one time step at a time
-        if use_teacher_forcing:
-            for t in range(max_target_len):
-                decoder_output,decoder_hidden=decoder(
-                        decoder_input,decoder_hidden,encoder_outputs)
-                #No teacher forcing: next input is decoder's own current output
-                _, topi=decoder_output.topk(1)
-                decoder_input=torch.LongTensor([[topi[i][0] for in range(batch_size)]])
-                decoder_input=decoder_input.to(device)
-                #Calculate and accumlate loss
-                mask_loss,nTotal=maskNLLLoss(decoder_output,target_variable[t],mask[t])
-                loss+=mask_loss
-                print_losses.append(mask_loss.item()*nTotal)
-                n_totals+=Total
-        else:
-            for t in range(max_target_len):
-                decoder_output,decoder_hidden=decoder(decoder_input,decoder_hidden,encoder_outputs)
-                #No teacher forcing :next input is decoder's own current output
-                _,topi=decoder_output.topk(1)
-                decoder_input=torch.LongTensor([[topi[i][0]for i in range(batch_size)]])
-                decoder_input=decoder_input.to(devivce)
-                #Calculate and accumulate loss
-                mask_loss,nTotal=maskNLLLoss(decoder_output,target_variable[t],mask[t])
-                loss+=mask_loss
-                print_losses.append(mask_loss.item()*nTotal)
-                n_totals+=nTotal
-                
-        #Perform backpropatation
-        loss.backward()
-        
-        #Clip gradients:gradients are modified in place
-        _=nn.utils.clip_grad_norm_(encoder.parameters(),clip)
-        _=nn.utils.clip_grad_norm_(decoder.parameters(),clip)
-        
-        #Adjust model weights
-        encoder_optimizer.step()
-        decoder_optimizer.step()
-        
-        return sum(print_loss)/n_totals
+    #Perform backpropatation
+    loss.backward()
+    
+    #Clip gradients:gradients are modified in place
+    _=nn.utils.clip_grad_norm_(encoder.parameters(),clip)
+    _=nn.utils.clip_grad_norm_(decoder.parameters(),clip)
+    
+    #Adjust model weights
+    encoder_optimizer.step()
+    decoder_optimizer.step()
+    
+    return sum(print_losses)/n_totals
     
 #Training iterations
         
 def trainIters(model_name,voc,pairs,encoder,decoder,encoder_optimizer,decoder_optimizer,
-               embedding, encoder_n_layers,decoder_n_layers,save_dir,n_iteration,batch_size,print_every,
-               save_every,clip,corpus_name,loadFilename):
-    
+           embedding, encoder_n_layers,decoder_n_layers,save_dir,n_iteration,batch_size,print_every,
+           save_every,clip,corpus_name,loadFilename):
+
     #Load batchers for each iteration
     training_batches=[batch2TrainData(voc,[random.choice(pairs) for _ in range(batch_size)])
     for _ in range(n_iteration)]
-    
+
     #Initialization
     print("Initializing...")
     start_iteration=1
     print_loss=0
     if loadFilename:
         start_iteration=checkpoint['iteration']+1
-        
+    
     #Training loop
     print("Training...")
     for iteration in range(start_iteration,n_iteration+1):
         training_batch=training_batches[iteration-1]
         #Extract fields from batch
         input_variable,lengths,target_variable,mask,max_target_len=training_batch
-        
+    
         #Run a training iteration with batch
         loss=train(input_variable,lengths,target_variable,mask,max_target_len,encoder,
                    decoder,embedding,encoder_optimizer,decoder_optimizer,batch_size,clip)
         print_loss+=loss
-        
+    
         #Print progress
         if iteration%print_every==0:
             print_loss_avg=print_loss/print_every
             print("Iteration:{};Percent complete:{:.1f}%;Average loss:{:.4f}".format(iteration,
                   iteration/n_iteration*100,print_loss_avg))
             print_loss=0
-            
+        
         #Save checkpoint
         if(iteration%save_every==0):
-            direction=os.path.join(save_dir,model_name,corpus_name,'{}-{}_{}'.format(encoder_n_layers,
-                                   decoder_n_layers,hidden_size))
-            if not os.path.exists(diretory):
+            directory=os.path.join(save_dir,model_name,corpus_name,'{}-{}_{}'.format(encoder_n_layers,
+                               decoder_n_layers,hidden_size))
+            if not os.path.exists(directory):
                 os.makedirs(directory)
-            torch.save({
-                    'iteration':iteration,
-                    'en':encoder.state_dict(),
-                    'de':decoder.state_dict(),
+                torch.save({
+                        'iteration':iteration,
+                        'en':encoder.state_dict(),
+                        'de':decoder.state_dict(),
                     'en_opt':encoder_optimizer.state_dict(),
                     'de_opt':decoder_optimizer.state_dict(),
                     'loss':loss,
                     'voc_dict':voc.__dict__,
                     'embedding':embedding.state_dict()
-                },os.path.join(directory,'{}_{}.tar'.format(iteration,'checkpoint')))
-    
+                    },os.path.join(directory,'{}_{}.tar'.format(iteration,'checkpoint')))
+
 
 #Define Evaluation 
 class GreedySearchDecoder(nn.Module):
@@ -760,7 +802,7 @@ class GreedySearchDecoder(nn.Module):
             decoder_output,decoder_hidden=self.decoder(decoder_input,decoder_hidden,
                                                        encoder_outputs)
             #Obtain most likely word token and its softmax score
-            decoer_scores,decoder_input=torch.max(decoder_output,dim=1)
+            decoder_scores,decoder_input=torch.max(decoder_output,dim=1)
             #Record token and score
             all_tokens=torch.cat((all_tokens,decoder_input),dim=0)
             all_scores=torch.cat((all_scores,decoder_scores),dim=0)
