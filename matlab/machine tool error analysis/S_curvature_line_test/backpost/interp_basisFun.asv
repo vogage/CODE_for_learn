@@ -1,0 +1,28 @@
+function y=interp_basisFun(i,j,u,n,U)
+% %this function was used to calculate the interp
+% %matrix K
+% %it is contained the first derivative and second derivative of 
+% %BasisFun(ith) and BasisFun(jth) in the whole interval [0,1]
+% 
+% %1 calculate the first derivative B(ith) multi B(jth)
+
+p=3; %the degree of basis function
+n=length(u);
+y=zeros(1,n);
+
+for k=1:n
+    der_i1=calculate_derivate_Basis(i,p,u(k),U);
+%     y1(k)=Basis(i,p,u(k),U);
+   % der_j1=calculate_derivate_Basis(j,p,u(k),U);
+    
+   % der_i2=calculate_second_derivate_Basis(i,p,u(k),U);
+   % der_j2=calculate_second_derivate_Basis(j,p,u(k),U);
+    %y(k)=abs(der_j2);
+    %y(k)=der_i1*der_j1+der_i2*der_j2;
+end
+
+% for k=2:n
+%     y2(k)=(y1(k)-y1(k-1))/(u(k)-u(k-1));
+% end
+
+    
