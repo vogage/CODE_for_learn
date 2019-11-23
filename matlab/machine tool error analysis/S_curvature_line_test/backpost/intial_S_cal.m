@@ -54,7 +54,13 @@ for i=2:length(points1)
     at(i,1)=total_temp_points_distance/total_points_distance;
 end
 
+% this part of m file was used to initial the parameters of
+% B_spline in NC code 
 
+r=5;
+p=3;
+n=length(NC1);
+[m,U,P]=GlobalCurveInterp(n-1,NC1,r,p);
 %---------------------------------------------------------------------
 % solve the the system of equantions with the above initial value
 %-------------------------------------------------------------------------
