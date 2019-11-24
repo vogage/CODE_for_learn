@@ -1,4 +1,4 @@
-function d_t=diff_t_point_of_tool_axis_surface(a,t,w,U)
+function d_a=diff_wi_point_of_tool_axis_surface(a,t,i,w,U)
 %this function was used to calculate the derivate of 
 %point in tool axis movement surface by a
 
@@ -6,17 +6,19 @@ function d_t=diff_t_point_of_tool_axis_surface(a,t,w,U)
 %            t: the unit parameter in the position of tool tracjectory
 %            [0,1]
 %           w:the control points of B_spline NC code
+%            i: the ith control point
 %           U: the corresponding knote vector
 
 h=1*10^(-5);
-if(t-h<0)
-    d_t=zeros(1,3);
+if(a-h<0)
+    d_a=zeros(1,3);
     return;
 end
-t2=t;
-t1=t-h;
-f1=cal_point_of_tool_axis_surface(a,t1,w,U);
-f2=cal_point_of_tool_axis_surface(a,t2,w,U);
+a2=a;
+a1=a-h;
+w(i)=w(i)-h;
+f1=cal_point_of_tool_axis_surface(a1,t,w,U);
+f2=cal_point_of_tool_axis_surface(a2,t,w,U);
 
-d_t=(f2-f1)/h;
+d_a=(f2-f1)/h;
 
