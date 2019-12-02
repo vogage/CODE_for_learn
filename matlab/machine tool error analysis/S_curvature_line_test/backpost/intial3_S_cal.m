@@ -26,14 +26,14 @@ at=zeros(n_points,2);
 % the follow is to calculate the approprivate initial value of 
 % the parameter a and t
 %------------------------------------------------------------------------
-total_points_distance=norm(points1(1,:)-xyz(1,:));
+total_points_distance=norm(points1(1,1:2)-xyz(1,1:2));
 
 for i=2:length(points1)
     total_points_distance=total_points_distance+ ...
-        norm(points1(i,:)-points1(i-1,:));
+        norm(points1(i,1:2)-points1(i-1,1:2));
 end
 total_points_distance=total_points_distance+ ...
-    norm(xyz(end,:)-points1(end,:));
+    norm(xyz(end,1:2)-points1(end,1:2));
 
 % if(abs(points1(1,3))<abs(points1(1,3)-20))
 %     at(1,1)=20/25;
@@ -41,7 +41,7 @@ total_points_distance=total_points_distance+ ...
 %     at(1,1)=10/25;
 % end
 at(1,1)=(points1(1,3)/ijk(1,3))/25;
-total_temp_points_distance=norm(points1(1,:)-xyz(1,:));
+total_temp_points_distance=norm(points1(1,1:2)-xyz(1,1:2));
 at(1,2)=total_temp_points_distance/total_points_distance;
 for i=2:length(points1)
 %     if(abs(points1(i,3))<abs(points1(i,3)-20))
@@ -52,7 +52,7 @@ for i=2:length(points1)
     at(i,1)=(points1(i,3)/ijk(i,3))/25;
 
     total_temp_points_distance=total_temp_points_distance+  ...
-        norm(points1(i,:)-points1(i-1,:));
+        norm(points1(i,1:2)-points1(i-1,1:2));
     at(i,2)=total_temp_points_distance/total_points_distance;
 end
 
@@ -68,7 +68,7 @@ n=length(NC1);
 %-------------------------------------------------------------------------
 at_fsolve=fsolve_at(at,U,P,points1);
 
-
+at_fsolve=fsolve_at(at_fsolve,U,P,points1);
 %---------------------------------------------------------------------
 %second method use the ga method to calculate the 
 %a,t parameter when the point to the envelop surface
@@ -83,7 +83,41 @@ at_fsolve=fsolve_at(at,U,P,points1);
 % at0=at_ga(at,U,P,points1);
 
 
-A=cal_derive_distance(points,W,at_fsolve,U);
+A=cal_derive_distance(points1,P,at_fsolve,U);
+
+%----------------------------------------------------------------
+%calculate the K (stiffness) matrix for the smoothness
+%here only consider the AC influence
+%------------------------------------------------------------------
+n=length(P);
+K=zeros(n,n);
+% syms u
+% y=interp_basisFun(i,j,u,n,U);
+
+
+% fun=@(i,j,t,n,U)interp_basisFun(i,j,t,n,U);
+% 
+% for i=1:n
+%     for j=1:n
+%         
+%       K(i,j)=integral(@(t)fun(i,j,t,n,U),0,1);
+%       
+%     end
+% end
+% 
+% K_AC=zeros(5*n,5*n);
+% K_AC(3*n+1:4*n,3*n+1:4*n)=K;
+% K_AC(4*n+1:5*n,4*n+1:5*n)=K;
+
+%---------------------------------------------------------------------
+%calculate the initial distance between tool formate envelope
+%surface and the selected point from S workpiece 
+n=length(points1);
+d_points=zeros(n,1);
+for i=1:n
+    d_points(i)=cal_distance_point_tool_envelope(points1,P,i,at_fsolve,U);
+end
+
 
 
 

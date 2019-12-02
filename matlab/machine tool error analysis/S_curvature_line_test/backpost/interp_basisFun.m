@@ -12,7 +12,7 @@ y=zeros(1,n);
 
 for k=1:n
     der_i1=calculate_derivate_Basis(i,p,u(k),U);
-    y1(k)=Basis(i,p,u(k),U);
+    %y1(k)=Basis(i,p,u(k),U);
     der_j1=calculate_derivate_Basis(j,p,u(k),U);
     
     der_i2=calculate_second_derivate_Basis(i,p,u(k),U);

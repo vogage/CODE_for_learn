@@ -1,4 +1,4 @@
-function d_a=diff_a_point_of_tool_axis_surface(a,t,i,w,U)
+function d_a=diff_a_point_of_tool_axis_surface(a,t,w,U)
 %this function was used to calculate the derivate of 
 %point in tool axis movement surface by a
 
