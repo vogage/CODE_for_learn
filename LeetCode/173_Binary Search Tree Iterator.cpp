@@ -100,13 +100,101 @@ public:
 		return!q.empty();
 	}
 };
+
+
+class BSTIterator3 {
+public:
+	queue<int> q;
+	stack<TreeNode*>st;
+
+	BSTIterator3(TreeNode* root) {
+		roll_queue(q, root);
+	}
+	void roll_queue(queue<int>& q, TreeNode* root) {
+		if (!root)return;
+		if (root->left) roll_queue(q, root->left);
+		q.push(root->val);
+		if (root->right) roll_queue(q, root->right);
+		return;
+	}
+	/** @return the next smallest number */
+	int next() {
+		if (hasNext()) {
+			int res = q.front();
+			q.pop();
+			return res;
+		}
+	}
+	/** @return whether we have a next smallest number*/
+	bool hasNext() {
+		return !q.empty();
+	}
+};
+
+class BSTIterator4 {
+public:
+	queue<int> q;
+	stack<TreeNode*>st;
+
+	BSTIterator4(TreeNode* root) {
+		roll_queue(q, root);
+	}
+	void roll_queue(queue<int>& q, TreeNode* root) {
+		if (!root)return;
+		if (root->left) roll_queue(q, root->left);
+		q.push(root->val);
+		if (root->right) roll_queue(q, root->right);
+		return;
+	}
+	/** @return the next smallest number */
+	int next() {
+		if (hasNext()) {
+			int res = q.front();
+			q.pop();
+			return res;
+		}
+	}
+	/** @return whether we have a next smallest number*/
+	bool hasNext() {
+		return !q.empty();
+	}
+};
+
+
+class BSTIterator5
+{
+	stack<TreeNode*> st;
+public:
+	BSTIterator5(TreeNode* root) {
+		push_all_left_node(st,root);
+	}
+	int next() {
+		if (hasNext()) {
+			TreeNode* node = st.top();
+			st.pop();
+			push_all_left_node(st, node->right);
+			return node->val;
+		}
+		return 0;
+	}
+	bool hasNext() {
+		return !st.empty();
+	}
+	void push_all_left_node(stack<TreeNode*>& st, TreeNode* root) {
+		for (; root != nullptr; st.push(root), root = root->left);
+	}
+
+};
+
+
+
 int main() {
 	TreeNode *root = new TreeNode(7);
 	root->left = new TreeNode(3);
 	root->right = new TreeNode(15);
 	root->right->left = new TreeNode(9);
 	root->right->right = new TreeNode(20);
-	BSTIterator2* obj = new BSTIterator2(root);
+	BSTIterator5* obj = new BSTIterator5(root);
 	int param_1 = obj->next();
 	int param_2 = obj->next();
 	int param_3 = obj->next();
