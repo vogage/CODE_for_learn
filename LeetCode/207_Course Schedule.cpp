@@ -35,6 +35,82 @@ public:
 	}
 };
 
+
+class Solution2 {
+public:
+	bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) {
+		graph g = buildGraph(numCourses, prerequisites);
+		vector<bool> todo(numCourses, false), done(numCourses, false);
+		for (int i = 0; i < numCourses; i++) {
+			if (!done[i] && !acyclic(g, todo, done, i)) {
+				return false;
+			}
+		}
+		return true;
+	}
+private:
+	typedef vector<vector<int>> graph;
+
+	graph buildGraph(int numCourses, vector<pair<int, int>>& prerequisites) {
+		graph g(numCourses);
+		for (auto p : prerequisites) {
+			g[p.second].push_back(p.first);
+		}
+		return g;
+	}
+
+	bool acyclic(graph& g, vector<bool>& todo, vector<bool>& done, int node) {
+		if (todo[node]) {
+			return false;
+		}
+		if (done[node]) {
+			return true;
+		}
+		todo[node] = done[node] = true;
+		for (int v : g[node]) {
+			if (!acyclic(g, todo, done, v)) {
+				return false;
+			}
+		}
+		todo[node] = false;
+		return true;
+	}
+};
+
+
+class	Solution3 {
+public:
+
+	bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+		unordered_map<int, vector<int>> graph;
+		build_graph(graph, numCourses, prerequisites);
+		vector<bool> done(numCourses, false);
+		for (int i = 0; i < numCourses; i++) {
+			if (iscircle(graph, done, i))return false;
+		}
+		return true;
+	}
+
+	void build_graph(unordered_map<int, vector<int>>& graph, int numCourses, vector<vector<int>>& prerequisites) {
+		for (int i = 0; i < prerequisites.size(); i++) {
+			graph[prerequisites[i][1]].push_back(prerequisites[i][0]);
+		}
+		return;
+	}
+
+	bool iscircle(unordered_map<int, vector<int>>& graph, vector<bool> &done, int i) {
+		if (done[i])return true;
+		done[i] = true;
+		for (auto p : graph[i]) {
+			if (iscircle(graph, done, p)) return false;
+		}
+		done[i] = false;
+		return false;
+	}
+
+};
+
+
 int main() {
 	//[[1, 0], [0, 1]]
 	int k = 2;
@@ -53,8 +129,15 @@ int main() {
 	input = { 2,0 };
 	prerequisites2.push_back(input);
 
-	Solution mysolu;
-	bool res = mysolu.canFinish(k, prerequisites2);
+	vector<pair<int, int>> prerequisites3;
+	vector<vector<int>> prerequisites4;
+	input = { 0,1 };
+	prerequisites4.push_back(input);
+
+
+
+	Solution3 mysolu;
+	bool res = mysolu.canFinish(3, prerequisites2);
 	return 0;
 
 }
