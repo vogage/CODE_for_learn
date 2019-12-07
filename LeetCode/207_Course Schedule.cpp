@@ -85,8 +85,9 @@ public:
 		unordered_map<int, vector<int>> graph;
 		build_graph(graph, numCourses, prerequisites);
 		vector<bool> done(numCourses, false);
+		vector<bool> already(numCourses, false);
 		for (int i = 0; i < numCourses; i++) {
-			if (iscircle(graph, done, i))return false;
+			if (!already[i]&&iscircle(graph, done, already,i))return false;
 		}
 		return true;
 	}
@@ -98,11 +99,13 @@ public:
 		return;
 	}
 
-	bool iscircle(unordered_map<int, vector<int>>& graph, vector<bool> &done, int i) {
+	bool iscircle(unordered_map<int, vector<int>>& graph, vector<bool> &done, vector<bool> & already,int i) {
 		if (done[i])return true;
+		if (already[i])return false;
 		done[i] = true;
+		already[i] = true;
 		for (auto p : graph[i]) {
-			if (iscircle(graph, done, p)) return false;
+			if (iscircle(graph, done,already, p)) return true;
 		}
 		done[i] = false;
 		return false;
@@ -132,6 +135,8 @@ int main() {
 	vector<pair<int, int>> prerequisites3;
 	vector<vector<int>> prerequisites4;
 	input = { 0,1 };
+	prerequisites4.push_back(input);
+	input = { 1,0 };
 	prerequisites4.push_back(input);
 
 
