@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string>
 #include<vector>
+#include<unordered_map>
 #include<algorithm>
 using namespace std;
 
@@ -44,8 +45,123 @@ public:
  * bool param_3 = obj->startsWith(prefix);
  */
 
+class TrieNode {
+public:
+	TrieNode* children[26];
+	bool is_word;
+
+	//initial your data structure here
+	TrieNode(bool b = false) {
+		memset(children, 0, sizeof(children));
+		is_word = false;
+	}
+};
+
+
+class Trie2 {
+public:
+	TrieNode *root;
+	/** Initialize your data structure here. */
+	Trie2() {
+		root = new TrieNode();
+	}
+
+	/** Inserts a word into the trie. */
+	void insert(string word) {
+		TrieNode *p = root;
+		for (int i = 0; i < word.size(); i++) {
+			if (p->children[word[i] - 'a'] == NULL) {
+				p->children[word[i] - 'a'] = new TrieNode();
+			}
+				p = p->children[word[i] - 'a'];
+		}
+		p->is_word = true;
+	}
+
+	/** Returns if the word is in the trie. */
+	bool search(string word) {
+		TrieNode* p = root;
+		for (int i = 0; i < word.size(); i++) {
+			if (p->children[word[i] - 'a'] == NULL)return false;
+			p = p->children[word[i] - 'a'];
+
+		}
+		return p->is_word;
+	}
+
+	/** Returns if there is any word in the trie that starts with the given prefix. */
+	bool startsWith(string prefix) {
+		TrieNode *p = root;
+		for (int i = 0; i < prefix.size(); i++) {
+			if (p->children[prefix[i] - 'a'] == NULL)return false;
+			p = p->children[prefix[i] - 'a'];
+		}
+		return true;
+	}
+};
+
+
+
+class TrieNode1 {
+public:
+	//TrieNode1* children[26];
+	unordered_map<char,TrieNode1*>children;
+	bool is_word;
+
+	//initial your data structure here
+	TrieNode1(bool b = false) {
+		//memset(children, 0, sizeof(children));
+		is_word = false;
+	}
+};
+
+
+class Trie3 {
+public:
+	TrieNode1 *root;
+	/** Initialize your data structure here. */
+	Trie3() {
+		root = new TrieNode1();
+	}
+
+	/** Inserts a word into the trie. */
+	void insert(string word) {
+		TrieNode1 *p = root;
+		for (int i = 0; i < word.size(); i++) {
+			if (p->children[word[i]] == NULL) {
+				p->children[word[i]] = new TrieNode1();
+
+			}
+			p = p->children[word[i]];
+		}
+		p->is_word = true;
+	}
+
+	/** Returns if the word is in the trie. */
+	bool search(string word) {
+		TrieNode1* p = root;
+		for (int i = 0; i < word.size(); i++) {
+			if (p->children[word[i]] == NULL)return false;
+			p = p->children[word[i]];
+
+		}
+		return p->is_word;
+	}
+
+	/** Returns if there is any word in the trie that starts with the given prefix. */
+	bool startsWith(string prefix) {
+		TrieNode1 *p = root;
+		for (int i = 0; i < prefix.size(); i++) {
+			if (p->children[prefix[i]] == NULL)return false;
+			p = p->children[prefix[i]];
+		}
+		return true;
+	}
+};
+
+
 int main() {
-	Trie *obj = new Trie();
+	Trie3 *obj = new Trie3();
 	obj->insert("ab");
 	bool res1 = obj->search("abc");
 	bool res2 = obj->search("ab");
