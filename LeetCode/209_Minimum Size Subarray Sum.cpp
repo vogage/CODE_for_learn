@@ -41,8 +41,25 @@ public:
 	}
 };
 
+class Solution2 {
+public:
+	int minSubArrayLen(int s, vector<int>& nums) {
+		int i = 0, j = 0;
+		int m = INT_MAX;
+		int temp = 0;
+		while (i < nums.size()) {
+			temp += nums[i++];
+			while (temp>=s) {
+				m = min(m, i - j);
+				temp -= nums[j++];
+			}
+		}
+		return m == INT_MAX ? 0 : m;
+	}
+};
+
 int main() {
-	Solution mysolu;
+	Solution2 mysolu;
 	//s = 7, nums = [2,3,1,2,4,3]
 	int s = 7;
 	vector<int> nums = { 2,3,1,2,4,3 };
@@ -51,7 +68,7 @@ int main() {
 	//int res = mysolu.minSubArrayLen(s, nums);
 	vector<int> nums2 = { 1,2,3,4,5 };
 	int s2 = 11;
-	int res2 = mysolu.minSubArrayLen(s2, nums2);
+	int res2 = mysolu.minSubArrayLen(s1, nums1);
 	return 0;
 }
 
