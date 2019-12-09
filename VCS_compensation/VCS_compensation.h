@@ -4,19 +4,19 @@
 using namespace std;
 
 struct NC_code {// machine tool NC code X Y Z A B C
-	float X;
-	float Y;
-	float Z;
-	float A;
-	float B;
-	float C;
+	float X=0;
+	float Y=0;
+	float Z=0;
+	float A=0;
+	float B=0;
+	float C=0;
 	int num;// 序号
 };
 
 struct Point { //x y z error and cooresponding NC code
-	float Err_x;
-	float Err_y;
-	float Err_z;
+	float Err_x=0;
+	float Err_y=0;
+	float Err_z=0;
 	NC_code origin_NC;//补偿前数控代码
 	NC_code new_NC;//补偿后数控代码
 	int num;//序号
@@ -42,10 +42,19 @@ public:
 		#1 AC_test: 生成的检测轨迹
 
 	*/
-	
-	
+	void read_test_error();
+	/*
+	   Output:
+	   1# AC_error: 测量误差
+	   tip: 读取检测的误差结果文件，注意与检测轨迹相对应
+	*/
 
-private:
+	void read_compensation_NC_code();
+	/*
+	    Output:
+		1# AC_compensation: 补偿轨迹
+		tip：读取需要补偿的NC代码
+	*/
 	void calculate_the_compensation_trajectory();
 	/**
 	Input:
@@ -55,6 +64,9 @@ private:
 	#1 AC_compensation.new_NC
 	 tip:该函数是用来计算补偿后的数控轨迹
 	*/
+
+private:
+
 
 	void find_AC_brick(vector<float>& AC_need_compensation, Array& AC_element,Array& AC_element_error);
 	/**

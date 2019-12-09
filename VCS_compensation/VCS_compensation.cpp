@@ -1,5 +1,7 @@
 #include"VCS_compensation.h"
 #include<math.h>
+#include<sstream>
+#include<fstream>
 
 
 void VCS::initial_AC_test_trajectory(float Astart, float Aend, float Cstart, float Cend, int numA, int numC) {
@@ -23,6 +25,30 @@ void VCS::initial_AC_test_trajectory(float Astart, float Aend, float Cstart, flo
 	return;
 }
 
+void VCS::read_test_error() {
+	
+	ifstream in("error.txt");
+	vector<float> er(3,0);
+	while (!in.eof()) {
+		in >> er[0] >> er[1] >> er[2];
+		AC_error.push_back(er);
+	}
+
+	//最后一行读了两遍
+	AC_error.pop_back();
+	return;
+}
+
+void VCS::read_compensation_NC_code() {
+	ifstream in("NC.txt");
+	Point p;
+	while (!in.eof()) {
+		in >> p.origin_NC.X >> p.origin_NC.Y >> p.origin_NC.Z >> p.origin_NC.A >> p.origin_NC.C;
+		AC_compensation.push_back(p);
+	}
+	AC_compensation.pop_back();
+	return;
+}
 
 void VCS::calculate_the_compensation_trajectory() {
 
@@ -60,21 +86,21 @@ void VCS::calculate_the_compensation_trajectory() {
 void VCS::find_AC_brick( vector<float>& AC_need_compensation,Array& AC_element, Array& AC_element_error){
 
 	int n = AC.size();
-	for (int i = 1; i <=4; i++) {
+	for (int i = 0; i <4; i++) {
 		AC_element[i] = AC[i];
 	}
 	float at = AC_need_compensation[0];
 	float ct = AC_need_compensation[1];
-	
+	if (ct < 0) ct = ct + 360;
 
-	for (int i = 1; i <= n; i++) {
+	for (int i = 0; i < n; i++) {
 		float a = AC[i][0];
 		float c = AC[i][1];
 		vector<float> er = AC_error[i];
 		float r_temp = pow(a - at, 2) + pow(c - ct, 2);
 
 		if (a <= at) {
-			if (c <= ct) {//left-up position
+			if (c <= ct) {//left-down position
 				float r_origin = pow(AC_element[0][0] - at, 2) + pow(AC_element[0][1] - ct, 2);
 				if (r_temp < r_origin) {
 					AC_element[0][0] = a;
@@ -82,7 +108,7 @@ void VCS::find_AC_brick( vector<float>& AC_need_compensation,Array& AC_element, 
 					AC_element_error[0] = er;
 				}				
 			}
-			else {//left_down position
+			else {//left_up position
 				float r_origin = pow(AC_element[1][0] - at, 2) + pow(AC_element[1][1] - ct, 2);
 				if (r_temp < r_origin) {
 					AC_element[1][0] = a;
@@ -118,12 +144,16 @@ void VCS::get_AC_test_error(Array& AC_element, Array& AC_element_error, vector<f
 	float mean_c = (AC_element[0][1] + AC_element[1][1]) / 2;
 	float m = (AC_element[2][0] - AC_element[0][0]) / 2;
 	float n = (AC_element[1][1] - AC_element[0][1]) / 2;
-	float t = (AC_need_compensation[1] - mean_c) / n;
-	float s = (AC_need_compensation[0] - mean_a) / m;
+   
+	float A = AC_need_compensation[0];
+	float C = AC_need_compensation[1];
+	if (C < 0) C = C + 360;
+	float t = (C - mean_c) / n;
+	float s = (A - mean_a) / m;
 	
 	for (int i = 0; i < 4; i++) {
 		float tj = (AC_element[i][1] - mean_c) / n;
-		float sj = (AC_element[i][0] - mean_c) / m;
+		float sj = (AC_element[i][0] - mean_a) / m;
 		float Nj = (1 + t * tj)*(1 + s * sj) / 4;
 		for (int j = 0; j < xyz_error.size(); j++) {
 			xyz_error[j] =xyz_error[j] + AC_element_error[i][j] * Nj;
