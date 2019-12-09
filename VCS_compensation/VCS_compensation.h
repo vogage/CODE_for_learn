@@ -17,7 +17,8 @@ struct Point { //x y z error and cooresponding NC code
 	float Err_x;
 	float Err_y;
 	float Err_z;
-	NC_code NC;
+	NC_code origin_NC;//补偿前数控代码
+	NC_code new_NC;//补偿后数控代码
 	int num;//序号
 };
 
@@ -27,8 +28,7 @@ typedef vector<vector<float>> Array;
 
 class VCS {
 public:
-	void initial_AC_test_trajectory(float Astart, float Aend, float Cstart, float Cend, int numA, int numC);
-		
+	void initial_AC_test_trajectory(float Astart, float Aend, float Cstart, float Cend, int numA, int numC);		
 	/**
 		Input:
 		#1 Astart: A轴轨迹起始点
@@ -37,14 +37,25 @@ public:
 		#4 Cend: C轴轨迹结束点
 		#5 numA: A轴轨迹取点数量
 		#6 numC: C轴轨迹取点数量
-		#7 pulse_flag: 机床暂停指令
+     ------------------------------------------------------------------------------------	----------------------------------	
 		Output:
 		#1 AC_test: 生成的检测轨迹
 
 	*/
 	
+	
 
 private:
+	void calculate_the_compensation_trajectory();
+	/**
+	Input:
+	#1 AC_compensation.origin_NC
+
+	Output: 
+	#1 AC_compensation.new_NC
+	 tip:该函数是用来计算补偿后的数控轨迹
+	*/
+
 	void find_AC_brick(vector<float>& AC_need_compensation, Array& AC_element,Array& AC_element_error);
 	/**
 		Input:
