@@ -202,6 +202,74 @@ public:
 	}
 };
 
+class Solution5 {
+public:
+	vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+		vector<vector<int>> graph(numCourses, vector<int>());
+		vector<vector<int>> graph_enter(numCourses, vector<int>());
+		vector<bool> todo(numCourses, false);
+		vector<bool> done(numCourses, false);
+		vector<int> res;
+		queue<int> q;
+		build_graph(graph, prerequisites);
+		build_graph_enter(graph_enter, prerequisites);
+		for (int i = 0; i < numCourses; i++) {
+			if (graph_enter[i].size() == 0) {
+				q.push(i);
+			}
+		}
+		for (int i = 0; i < numCourses; i++) {
+			if(!done[i]&&!DFS(graph, todo, done, i))return vector<int>();
+		}
+		for (auto i : done) i = false;
+		BFS(graph,q,res,done);
+		return res;
+	}
+
+private:
+	bool DFS(vector<vector<int>>& graph, vector<bool> todo, vector<bool>done, int choose) {
+		if (todo[choose]) return false;
+		if (done[choose])return true;
+		done[choose] = todo[choose] = true;
+		for (auto i : graph[choose]) {
+			if (!DFS(graph, todo, done, i))return false;
+		}
+		todo[choose] = false;
+		return true;
+	}
+
+	void BFS(vector<vector<int>>&graph,queue<int>& q,vector<int>& res,vector<bool>& done) {
+		if (q.size() == 0)return;
+		int choose = q.front();
+		q.pop();
+
+
+		if(!done[choose])res.push_back(choose);
+		done[choose] = true;
+		for (auto i : graph[choose]) {
+			q.push(i);
+			
+		}
+		BFS(graph,q, res,done);
+		
+		return;
+	}
+
+
+	void build_graph(vector<vector<int>>& graph, vector<vector<int>>& prerequisites) {
+		for (int i = 0; i < prerequisites.size(); i++) {
+			graph[prerequisites[i][1]].push_back(prerequisites[i][0]);
+		}
+		return;
+	}
+
+	void build_graph_enter(vector<vector<int>>& graph_enter, vector<vector<int>>& prerequisites) {
+		for (int i = 0; i < prerequisites.size(); i++) {
+			graph_enter[prerequisites[i][0]].push_back(prerequisites[i][1]);
+		}
+		return;
+	}
+};
 
 
 int main() {
@@ -253,8 +321,27 @@ int main() {
 	input = { 1,2 };
 	prerequisites6.push_back(input);
 
-	Solution4 mysolu;
-	vector<int> res = mysolu.findOrder(3, prerequisites4);
+	vector<vector<int>> prerequisites7;
+	//[[1, 0], [0, 3], [0, 2], [3, 2], [2, 5], [4, 5], [5, 6], [2, 4]]
+	input = { 1,0 };
+	prerequisites7.push_back(input);
+	input = { 0,3 };
+	prerequisites7.push_back(input);
+	input = { 0,2 };
+	prerequisites7.push_back(input);
+	input = { 3,2 };
+	prerequisites7.push_back(input);
+	input = { 2,5 };
+	prerequisites7.push_back(input);
+	input = { 4,5 };
+	prerequisites7.push_back(input);
+	input = { 5,6 };
+	prerequisites7.push_back(input);
+	input = { 2,4 };
+	prerequisites7.push_back(input);
+
+	Solution5 mysolu;
+	vector<int> res = mysolu.findOrder(7, prerequisites7);
 	
 
 	return 0;
