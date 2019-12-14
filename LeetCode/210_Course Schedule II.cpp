@@ -284,6 +284,39 @@ private:
 };
 
 
+class Solution6{
+public:
+	vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+		vector<int> indegree(numCourses,0);
+		vector<int> res;
+		for (int i = 0; i < prerequisites.size(); i++) {
+			indegree[prerequisites[i][0]]++;
+		}
+		queue<int> q;
+		for (int i = 0; i <numCourses; i++) {
+			if (indegree[i] == 0) {
+				q.push(i);
+				res.push_back(i);
+			}
+		}
+		while (!q.empty()) {
+			int choose = q.front(); q.pop();
+			for (int i = 0; i < prerequisites.size(); i++) {
+				if (prerequisites[i][1] == choose) {
+					indegree[prerequisites[i][0]]--;
+					if (indegree[prerequisites[i][0]] == 0) {
+						res.push_back(prerequisites[i][0]);
+						q.push(prerequisites[i][0]);
+					}
+				}
+			}
+		}
+		return res.size() == numCourses ? res : vector<int>();
+	}
+private:
+
+};
+
 int main() {
 	//4, [[1, 0], [2, 0], [3, 1], [3, 2]]
 	int numCourses = 4;
@@ -352,8 +385,8 @@ int main() {
 	input = { 2,4 };
 	prerequisites7.push_back(input);
 
-	Solution5 mysolu;
-	vector<int> res = mysolu.findOrder(7, prerequisites7);
+	Solution6 mysolu;
+	vector<int> res = mysolu.findOrder(2, prerequisites2);
 	
 
 	return 0;
