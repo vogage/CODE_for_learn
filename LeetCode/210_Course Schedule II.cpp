@@ -317,6 +317,45 @@ private:
 
 };
 
+
+class Solution7 {
+public:
+	vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+		vector<vector<int>> graph(numCourses,vector<int>());
+		vector<bool> onstack(numCourses, false);
+		vector<bool> done(numCourses, false);
+		vector<int> order;
+		build_graph(graph, prerequisites);
+		for (int i = 0; i < numCourses; i++) {
+			if (!done[i]) {
+				if (!iscircle(graph,i,done,onstack,order))return vector<int>();
+			}
+		}
+		return order;
+		
+	}
+private:
+	bool iscircle(vector<vector<int>>& graph,int choose, vector<bool>& done, vector<bool> &onstack, vector<int>&order) {
+		if (onstack[choose]) return false;
+		if (done[choose])return true;
+		onstack[choose] = true;
+		for (auto i : graph[choose]) {
+			if(!iscircle(graph,i,done,onstack,order)) return false;
+		}
+		onstack[choose] = false;
+		order.push_back(choose);
+		done[choose] = true;
+		return true;
+
+	}
+	void build_graph(vector<vector<int>>& graph, vector<vector<int>>& prerequisites) {
+		for (int i = 0; i < prerequisites.size(); i++) {
+			graph[prerequisites[i][0]].push_back(prerequisites[i][1]);
+		}
+		return;
+	}
+};
+
 int main() {
 	//4, [[1, 0], [2, 0], [3, 1], [3, 2]]
 	int numCourses = 4;
@@ -385,8 +424,8 @@ int main() {
 	input = { 2,4 };
 	prerequisites7.push_back(input);
 
-	Solution6 mysolu;
-	vector<int> res = mysolu.findOrder(2, prerequisites2);
+	Solution7 mysolu;
+	vector<int> res = mysolu.findOrder(7, prerequisites7);
 	
 
 	return 0;
