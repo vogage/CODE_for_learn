@@ -45,28 +45,9 @@ public:
 
 	bool DFS(string word, int index,TrNode *root) {
 		//if (root->children[word[index]] == NULL)return false;
-		if (root == NULL)return false;
-		bool flag = false;
-		for (auto p : root->children) {
-			flag = true;
-		}
-		if (flag == false)return false;
-		if (index == word.size() - 1) {
-			//return root->children[word[index]]->isWord;
-			if (word[index] == '.') {
-				//if (word.size() == 1) {
-					for (auto p : root->children) {
-						if (p.second == NULL)return false;
-						else return p.second->isWord;
-					}
-					return false;
-				//}				
-			}
-			else {
-				if(root->children[word[index]]==NULL) return false;
-				else return root->children[word[index]]->isWord;
-			}
-		}
+		if (index == word.size())return root->isWord;
+		
+		
 		if (word[index] == '.') {
 			for (auto p : root->children) {
 				if (DFS(word, index + 1, p.second)) return true;
@@ -74,7 +55,7 @@ public:
 			//return false;
 		}
 		else {
-			if (root->children[word[index]] == NULL)return false;
+			if (root->children.find(word[index]) ==root->children.end())return false;
 			else {
 				return DFS(word, index + 1, root->children[word[index]]);
 			}
@@ -84,6 +65,57 @@ public:
 
 
 	
+};
+
+class Teeeenode {
+public:
+	bool isword;
+	vector<Teeeenode*> children;
+
+	Teeeenode(bool b = false) {
+		isword = false;
+		for (int i = 0; i < 26; i++) children.push_back(NULL);
+	}
+};
+
+class WordDictionary2 {
+public:
+	/** Initialize your data structure here. */
+	Teeeenode *root;
+	WordDictionary2() {
+		root = new Teeeenode();
+	}
+
+	/** Adds a word into the data structure. */
+	void addWord(string word) {
+		Teeeenode *p = root;
+		for (auto i : word) {
+			if (p->children[i - 'a'] == NULL) {
+				p->children[i - 'a'] = new Teeeenode();
+			}
+			p = p->children[i - 'a'];
+		}
+		p->isword = true;
+		return;
+	}
+
+	/** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
+	bool search(string word) {
+		return DFS(word, 0, root);
+	}
+
+	bool DFS(string word, int index, Teeeenode* root) {
+		if (index == word.size())return root->isword;
+		if (word[index] == '.') {
+			for (int i = 0; i < 26; i++) {
+				if (root->children[i]&&DFS(word, index + 1, root->children[i])) return true;
+			}
+		}
+		else {
+			return root->children[word[index] - 'a'] != NULL && DFS(word, index + 1, root->children[word[index] - 'a']);
+		}
+		return false;
+	}
 };
 
 
@@ -99,14 +131,14 @@ int main() {
 
 	//["WordDictionary", "addWord", "addWord", "search", "search", "search", "search", "search", "search"]
 	//[[], ["a"], ["a"], ["."], ["a"], ["aa"], ["a"], [".a"], ["a."]]
-	//obj->addWord("a");
-	//obj->addWord("a");
+	obj->addWord("a");
+	obj->addWord("a");
 	//bool res1=obj->search(".");
 	//bool res2=obj->search("a");
-	//bool res3=obj->search("aa");
+	bool res3=obj->search("aa");
 	//bool res4=obj->search("a");
 	//bool res5=obj->search(".a");
-	//bool res6=obj->search("a.");
+	bool res6=obj->search("a.");
 
 	//["WordDictionary","addWord","addWord","addWord","addWord",
 	//"search","search","addWord","search",
@@ -135,16 +167,16 @@ int main() {
 	//[[], ["a"], ["ab"], ["a"], ["a."], ["ab"], 
 	//[".a"], [".b"], ["ab."], ["."], [".."]]
 
-	obj->addWord("a");
-	obj->addWord("ab");
-	bool res1 = obj->search("a");
-	bool res2 = obj->search("a.");
-	bool res3 = obj->search("ab");
-	bool res4 = obj->search(".a");
-	bool res5 = obj->search(".b");
-	bool res6 = obj->search("ab.");
-	bool res7 = obj->search(".");
-	bool res8 = obj->search("..");
+	//obj->addWord("a");
+	//obj->addWord("ab");
+	//bool res1 = obj->search("a");
+	//bool res2 = obj->search("a.");
+	//bool res3 = obj->search("ab");
+	//bool res4 = obj->search(".a");
+	//bool res5 = obj->search(".b");
+	//bool res6 = obj->search("ab.");
+	//bool res7 = obj->search(".");
+	//bool res8 = obj->search("..");
 
 	return 0;
 }
