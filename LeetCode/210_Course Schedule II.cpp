@@ -222,7 +222,7 @@ public:
 			if(!done[i]&&!DFS(graph, todo, done, i))return vector<int>();
 		}
 		for (auto i : done) i = false;
-		BFS(graph,q,res,done);
+		BFS(graph,graph_enter,q,res,done);
 		return res;
 	}
 
@@ -238,19 +238,31 @@ private:
 		return true;
 	}
 
-	void BFS(vector<vector<int>>&graph,queue<int>& q,vector<int>& res,vector<bool>& done) {
+	void BFS(vector<vector<int>>&graph,vector<vector<int>>& graph_enter,queue<int>& q,vector<int>& res,vector<bool>& done) {
 		if (q.size() == 0)return;
 		int choose = q.front();
 		q.pop();
 
 
-		if(!done[choose])res.push_back(choose);
+		if (!done[choose]) {
+			bool flag = true;
+			for (auto j : graph_enter[choose]) {
+				flag = flag && done[j];
+			}
+			if (flag) {
+				res.push_back(choose);
+			}
+			else {
+				q.push(choose);
+				BFS(graph,graph_enter,q,res,done);
+			}
+		}
 		done[choose] = true;
 		for (auto i : graph[choose]) {
 			q.push(i);
 			
 		}
-		BFS(graph,q, res,done);
+		BFS(graph,graph_enter,q, res,done);
 		
 		return;
 	}
