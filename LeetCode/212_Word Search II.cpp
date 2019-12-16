@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string>
 #include<vector>
+#include<unordered_map>
 
 
 using namespace std;
@@ -142,6 +143,109 @@ public:
 	//}
 };
 
+class Trnode {
+public:
+	
+	unordered_map<char, Trnode*> children;
+	bool isword = false;
+	Trnode(bool b = false) {
+		isword = false;
+	}
+
+
+};
+
+class Trie {
+public:
+	Trnode* root;
+	Trie() {
+		root = new Trnode();
+	}
+
+	void add(string word) {
+		Trnode* p = root;
+		for (auto c : word) {
+			if (p->children[c] == NULL) {
+				p->children[c] = new Trnode();
+			}
+			p = p->children[c];
+		}
+		p->isword = true;
+	}
+};
+
+class Solution3 {
+public:
+
+	vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+		Trie *obj = new Trie();
+		for (auto str : words) {
+			obj->add(str);
+		}
+		vector<string> res;
+
+		DFS(board, obj, res);
+		return res;
+	}
+	void DFS(vector<vector<char>>& board, Trie* t, vector<string> &res) {
+		int m = board.size();
+		int n = board[0].size();
+		vector<vector<bool>> touched(m, vector<bool>(n, false));
+		for (auto p : t->root->children) {
+			
+			for (int i = 0; i < board.size(); i++) {
+				for (int j = 0; j < board[0].size(); j++) {
+					if (board[i][j] == p.first) { string temp = "";temp+= p.first; DFSvec(board, touched,i,j,p.second, temp, res); }
+					
+				}
+			}
+		}
+	}
+	void DFSvec(vector<vector<char>>& board, vector<vector<bool>>& touched,int i,int j,Trnode* root, string& temp,vector<string>& res) {
+		if (root->isword) { res.push_back(temp); root->isword = false; }
+		//if (!(i >= 0 && i < board.size()))return;
+		//if (!(j >= 0 && j < board[0].size()))return;
+		touched[i][j] = true;
+		for (auto p : root->children) {
+			if ( i + 1 < board.size()) {
+				if ((!touched[i + 1][j]) && board[i + 1][j] == p.first) { 
+					temp.push_back(p.first);
+					DFSvec(board, touched, i + 1, j, p.second, temp, res);
+					temp.pop_back();
+				}
+
+			}
+			if (i - 1 >= 0 ) {
+				if ((!touched[i - 1][j]) && board[i - 1][j] == p.first) {
+					temp.push_back(p.first);
+					DFSvec(board, touched, i - 1, j, p.second, temp, res);
+					temp.pop_back();
+				}
+
+			}
+			if (j + 1 < board[0].size()) {
+				if ((!touched[i][j+1]) && board[i][j+1] == p.first) {
+					temp.push_back(p.first);
+					DFSvec(board, touched, i , j+1, p.second, temp, res);
+					temp.pop_back();
+				}
+
+			}
+			if (j - 1 >= 0) {
+				if ((!touched[i][j-1]) && board[i][j-1] == p.first) {
+					temp.push_back(p.first);
+					DFSvec(board, touched, i, j-1 ,p.second, temp, res);
+					temp.pop_back();
+				}
+
+			}
+		}
+		
+		touched[i][j] = false;
+		return;
+	}
+};
+
 int main() {
 	vector<vector<char>> board;
 	vector<char> input = { 'o','a','a','n' };
@@ -182,7 +286,24 @@ int main() {
 		"aaaaaaaaaaaaaaai","aaaaaaaaaaaaaaaj","aaaaaaaaaaaaaaak",
 		"aaaaaaaaaaaaaaal" };
 
-	Solution2 mysolu;
+	vector<vector<char>> board4;
+	input = { 's','e','e','n','e','w' };
+	board4.push_back(input);
+	input = { 't','m','r','i','v','a' };
+	board4.push_back(input);
+	input = { 'o','b','s','i','b','d' };
+	board4.push_back(input);
+	input = { 'w','m','y','s','e','n' };
+	board4.push_back(input);
+	input = { 'l','t','s','n','s','a' };
+	board4.push_back(input);
+	input = { 'i','e','z','l','g','n' };
+	vector<string> words4 = { "bend", "benda", "besa", "besan" };
+
+	//[["s", "e", "e", "n", "e", "w"], ["t", "m", "r", "i", "v", "a"], ["o", "b", "s", "i", "b", "d"], 
+	//	["w", "m", "y", "s", "e", "n"], ["l", "t", "s", "n", "s", "a"], ["i", "e", "z", "l", "g", "n"]]
+	
+	Solution3 mysolu;
 	vector<string> res = mysolu.findWords(board, words);
 	return 0;
 }
