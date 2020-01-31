@@ -2,6 +2,7 @@
 #include<string>
 #include<vector>
 #include<algorithm>
+#include<iostream>
 
 using namespace std;
 
@@ -128,6 +129,30 @@ public:
 		return table;
 	}
 
+	void kmp_pattern_search(string str, string word) {
+		vector<int> table = KMP(word);
+		int index = 0;
+		int i = 0;
+		while(i<str.size()){
+			if (str[i] == word[index]) {
+				index++;
+				i++;
+			
+				if (index == word.size()) {
+					cout << "find" << i << endl;
+					index = table[index - 1];
+				}
+			}
+			else {
+				if (index == 0) i++;
+				else {
+					index = table[index - 1];
+				}
+			}
+				
+		}
+	}
+
 
 };
 
@@ -138,5 +163,9 @@ int main() {
 	string input2 = "abcd";
 	string input3 = "a";
 	string res = mysolu.shortestPalindrome(input);
+
+	string W = "acabacacd";
+	string T = "acfacabacabacacdk";
+	mysolu.kmp_pattern_search(T, W);
 	return 0;
 }
