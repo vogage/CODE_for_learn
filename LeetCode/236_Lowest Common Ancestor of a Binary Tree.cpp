@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<stack>
+#include<unordered_set>
+#include<queue>
 
 using namespace std;
 
@@ -18,10 +20,11 @@ public:
 	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
 		stack<TreeNode*> tempst;
 		searchp(root, p, tempst);
+		unordered_set<TreeNode*> set;
 		while (!st.empty()) {
 			TreeNode* temp = st.top();
 			st.pop();
-			if (searchq(temp, q)) return temp;
+			if (searchq(temp, q,set)) return temp;
 		}
 		return nullptr;
 	}
@@ -32,27 +35,72 @@ public:
 			st = tempst;
 			return;
 		}
-
-		searchp(root->left, p, tempst);
-		searchp(root->right, p, tempst);
+		if (st.empty()) {
+			searchp(root->left, p, tempst);
+			searchp(root->right, p, tempst);
+		}
 		tempst.pop();
 	}
-	bool searchq(TreeNode* temp, TreeNode* q) {
+	bool searchq(TreeNode* temp, TreeNode* q,unordered_set<TreeNode*>& set) {
 		stack<TreeNode*> sta;
 		sta.push(temp);
 		while (!sta.empty()) {
 			TreeNode* tp = sta.top();
+			set.insert(tp);
 			sta.pop();
 			if (tp->val == q->val) return true;
-			if (tp->left)sta.push(tp->left);
-			if (tp->right)sta.push(tp->right);
+			//if (tp->left)sta.push(tp->left);
+			//if (tp->right)sta.push(tp->right);
+			if (tp->left&&set.find(tp->left) == set.end())sta.push(tp->left);
+			if (tp->right&&set.find(tp->right)== set.end())sta.push(tp->right);
 		}
 		return false;
 	}
 };
 
+
+class Solution2 {
+	vector<TreeNode*> que_p;
+	vector<TreeNode*> que_q;
+
+public:
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+		vector<TreeNode*> temp_que_p;
+		vector<TreeNode*> temp_que_q;
+		searchp(root, p, q, temp_que_p, temp_que_q);
+		int i = 0;
+		for (; i < que_p.size() && i < que_q.size(); i++) {
+			if (que_p[i] != que_q[i])break;
+		}
+		return i==0?nullptr:que_p[i-1];
+
+	}
+	void searchp(TreeNode* root, TreeNode* p, TreeNode* q, vector<TreeNode*> temp_que_p, vector<TreeNode*> temp_que_q) {		
+		if (que_p.empty())
+		{
+			temp_que_p.push_back(root);
+			if (root->val == p->val) {
+				que_p = temp_que_p;
+			}
+		}
+		if (que_q.empty()) {
+			temp_que_q.push_back(root);
+			if (root->val == q->val) {
+				que_q = temp_que_q;
+			}
+		}
+		if (!que_q.empty() && !que_p.empty()) return;
+		if (que_q.empty()||que_p.empty()) {
+			if(root->left)searchp(root->left, p,q,temp_que_p,temp_que_q);
+			if(root->right)searchp(root->right, p, q, temp_que_p, temp_que_q);
+		}
+		temp_que_p.pop_back();
+		temp_que_q.pop_back();
+	}
+
+};
 int main() {
-	Solution mysolu;
+	Solution2 mysolu;
 	TreeNode *root = new TreeNode(3);
 	root->left = new TreeNode(5);
 	root->left->left = new TreeNode(6);
@@ -72,7 +120,7 @@ int main() {
 	TreeNode *p1 = new TreeNode(1);
 	TreeNode* q1 = new TreeNode(2);
 
-	TreeNode * res = mysolu.lowestCommonAncestor(root1, p1, q1);
+	TreeNode * res = mysolu.lowestCommonAncestor(root, p, q);
 
 	return 0;
 }
