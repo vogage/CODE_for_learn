@@ -99,8 +99,47 @@ public:
 	}
 
 };
+
+
+class Solution3 {
+	vector<pair<TreeNode*, int>> que;
+public:
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+		//que.push_back(pair<TreeNode*, int>(root, 0));
+		searchnode(root, p, q, que);
+		int i = 0;
+		for (; i < que.size(); i++) {
+			if (que[i].second == 1)break;
+		}
+		return que[i-1].first;
+	}
+	void searchnode(TreeNode* root, TreeNode* p, TreeNode *q, vector<pair<TreeNode*, int>>& que) {
+		que.push_back(pair<TreeNode*, int>(root, 0));
+		if (que.front().second < 2) {
+			if (root->val == p->val) {
+				for (int i = 0; i < que.size(); i++) {
+					que[i].second++;
+				}
+			}
+			if (root->val == q->val) {
+				for (int i = 0; i < que.size(); i++) {
+					que[i].second++;
+				}
+			}
+			if (root->left) searchnode(root->left, p, q, que);
+			if (root->right) searchnode(root->right, p, q, que);
+
+		}
+		if (que.front().second == 2)return;
+
+		que.pop_back();
+	}
+};
+
+
+
 int main() {
-	Solution2 mysolu;
+	Solution3 mysolu;
 	TreeNode *root = new TreeNode(3);
 	root->left = new TreeNode(5);
 	root->left->left = new TreeNode(6);
@@ -120,7 +159,19 @@ int main() {
 	TreeNode *p1 = new TreeNode(1);
 	TreeNode* q1 = new TreeNode(2);
 
-	TreeNode * res = mysolu.lowestCommonAncestor(root, p, q);
+	TreeNode *root2 = new TreeNode(3);
+	root2->left = new TreeNode(5);
+	root2->left->left = new TreeNode(6);
+	root2->left->right = new TreeNode(2);
+	root2->left->right->left = new TreeNode(7);
+	root2->left->right->right = new TreeNode(4);
+	root2->right = new TreeNode(1);
+	root2->right->right = new TreeNode(8);
+
+	TreeNode *p2 = new TreeNode(5);
+	TreeNode* q2 = new TreeNode(4);
+
+	TreeNode * res = mysolu.lowestCommonAncestor(root2, p2, q2);
 
 	return 0;
 }
