@@ -136,10 +136,39 @@ public:
 	}
 };
 
+class Solution4 {
+public:
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+		if (root == NULL || root->val == p->val || root->val == q->val) return root;
+		TreeNode* left = lowestCommonAncestor(root->left, p, q);
+		TreeNode* right = lowestCommonAncestor(root->right, p, q);
+		//if (left == nullptr&&right == nullptr)return nullptr;
+		//if (left != nullptr&&right != nullptr)return root;
+		//return left == nullptr ? right : left;
+		if (left&& right) return root;
+		return left? left : right;
+	}
+};
+
+class Solution5 {
+public:
+	TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+		if (root == NULL || root->val == p->val || root->val == q->val) return root;
+		TreeNode* right = lowestCommonAncestor(root->right, p, q);
+		TreeNode* left = lowestCommonAncestor(root->left, p, q);
+		
+		//if (left == nullptr&&right == nullptr)return nullptr;
+		//if (left != nullptr&&right != nullptr)return root;
+		//return left == nullptr ? right : left;
+		if (left&& right) return root;
+		return right ? right: left;
+	}
+};
+
 
 
 int main() {
-	Solution3 mysolu;
+	Solution5 mysolu;
 	TreeNode *root = new TreeNode(3);
 	root->left = new TreeNode(5);
 	root->left->left = new TreeNode(6);
