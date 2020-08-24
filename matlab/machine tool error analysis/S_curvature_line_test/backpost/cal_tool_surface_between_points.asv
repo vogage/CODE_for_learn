@@ -1,0 +1,12 @@
+function diff_distance= cal_tool_surface_between_points(control)
+global U
+global tool_radius
+global at_solve
+
+n=length(at_solve);
+dif_array=zeros(n,1);
+for i=1:n
+    at(1)=at_solve(i,1);
+    at(2)=at_solve(i,2);
+    S=cal_point_of_tool_axis_surface(at(1),at(2),P,U);
+    dif_arr(i)=norm(S-points1(i,:))-tool_radius;

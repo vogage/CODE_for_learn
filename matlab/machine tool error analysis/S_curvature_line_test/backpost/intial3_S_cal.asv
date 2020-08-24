@@ -15,7 +15,7 @@ NC1=load("NC1.mat");
 points1=load("POINTS1.mat");
 points1=points1.points1;
 tool_radius=10;
-global at_solve;
+
 C=NC1(:,4);C=C*pi/180;
 A=NC1(:,5);A=A*pi/180;
 tool_vector=[0;0;1];
@@ -78,7 +78,8 @@ n=length(NC1);
 %---------------------------------------------------------------------
 % solve the the system of equantions with the above initial value
 %-------------------------------------------------------------------------
-[at_solve,dif_distance]=gradient_solve_at(at);
+[at_fsolve,dif_distance]=gradient_solve_at(at);
+
 
 %---------------------------------------------------------------------
 %second method use the ga method to calculate the 
@@ -103,7 +104,7 @@ K=zeros(n,n);
 %calculate the smoothness of A axis
 % syms u
 % y=interp_basisFun(i,j,u,n,U);
-NC_code=ga_cal_code();
+
 
 % fun=@(i,j,t,n,U)interp_basisFun(i,j,t,n,U);
 % 
@@ -122,18 +123,13 @@ NC_code=ga_cal_code();
 %---------------------------------------------------------------------
 %calculate the initial distance between tool formate envelope
 %surface and the selected point from S workpiece 
-% n=length(points1);
-% d_points=zeros(n,1);
-% for i=1:n
-%     d_points(i)=cal_distance_point_tool_envelope(points1,P,i,at_fsolve,U);
-% end
-% 
+n=length(points1);
+d_points=zeros(n,1);
+for i=1:n
+    d_points(i)=cal_distance_point_tool_envelope(points1,P,i,at_fsolve,U);
+end
 
 
-%---------------------------------------------------------------------
-%calculate the smoothness of A axis
-%Smooth_AC=cal_smoothnes_of_AC_axis();
 
-NC_code=ga_cal_code();
 
 

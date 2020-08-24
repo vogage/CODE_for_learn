@@ -8,6 +8,7 @@ function S=cal_point_of_tool_axis_surface(a,t,w,U)
 %           w:the control points of B_spline NC code
 %           U: the corresponding knote vector
 
+
 tool_length=25;
 p=3;
 n=length(w);

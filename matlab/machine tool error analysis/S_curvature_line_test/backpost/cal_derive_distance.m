@@ -15,10 +15,10 @@ for i=1:n
     P=points(1,:);
     S=cal_point_of_tool_axis_surface(at_fsolve(i,1),at_fsolve(i,2),control,U);
     for j=1:length(W)
-        a=at_fsolve(i,1);
-        t=at_fsolve(i,2);
+        a=at_fsolve(i,1)
+        t=at_fsolve(i,2)
         
-        S_wj=diff_wi_point_of_tool_axis_surface(a,t,j,control,U);
+        S_wj=diff_wi_point_of_tool_axis_surface(a,t,j,control,U)
         A(i,j)=S_wj*(S-P)';
     end
 end

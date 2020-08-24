@@ -1,0 +1,19 @@
+function NC_code=ga_cal_code()
+global P    %           P:the control points
+%  global U   %           U:the knotes
+% 
+% 
+%  global points1
+%  global tool_radius
+
+fun=@(w)ga_trajcetory_optimizatioon;
+
+x0=P
+ 
+
+
+ 
+
+ 
+ 
+
