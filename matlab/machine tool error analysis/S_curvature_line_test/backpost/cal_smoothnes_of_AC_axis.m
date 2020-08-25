@@ -17,7 +17,7 @@ fun=@(u) CurveDerivsAlg2(n+1,p,U,A,u,d,2);
 % the most d order of derivative
 % A_2=integral(fun,0,1)
 fun=@(u) CurveDerivsAlg2(n+1,p,U,A,u,d,1);
-A_1=integral(fun,0,1)
+A_1=integral(fun,0,1);
 
 
 
@@ -28,7 +28,7 @@ C=P(:,4);
 
 
 fun=@(u) CurveDerivsAlg2(n+1,p,U,C,u,d,2);
-C_1=integral(fun,0,1)
+C_1=integral(fun,0,1);
 
 Smooth_AC=A_1+C_1;
 
