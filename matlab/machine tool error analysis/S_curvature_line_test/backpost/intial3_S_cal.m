@@ -103,7 +103,7 @@ K=zeros(n,n);
 %calculate the smoothness of A axis
 % syms u
 % y=interp_basisFun(i,j,u,n,U);
-NC_code=ga_cal_code();
+
 
 % fun=@(i,j,t,n,U)interp_basisFun(i,j,t,n,U);
 % 

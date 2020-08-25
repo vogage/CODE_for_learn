@@ -11,19 +11,19 @@ n=length(P);
 x0=zeros(n*5,1);
 x0(1:n)=P(:,1);
 x0(n+1:n*2)=P(:,2);
-x0(2*n+1:n*3)=P(:,2);
-x0(3*n+1:n*4)=P(:,2);
-x0(4*n+1:n*5)=P(:,2);
+x0(2*n+1:n*3)=P(:,3);
+x0(3*n+1:n*4)=P(:,4);
+x0(4*n+1:n*5)=P(:,5);
 A=[];
 b=[];
 Aeq=[];
 beq=[];
 
-lb=x0-0.06;
-ub=x0+0.06;
+lb=x0-20;
+ub=x0+20;
 % NC_code=fminsearch(fun,x0);
 nonlcon = [];
-x = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon)
+NC_code = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon)
 
  
 
