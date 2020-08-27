@@ -18,7 +18,9 @@ fun=@(u) CurveDerivsAlg2(n-1,p,U,A,u,d,2);
 % A_2=integral(fun,0,1)
 %fun=@(u) CurveDerivsAlg2(n-1,p,U,A,u,d,1);
 A_1=integral(fun,0,1);
-
+fun=@(u) CurveDerivsAlg2(n-1,p,U,A,u,d,3);
+A_2=integral(fun,0,1);
+A_2=sqrt(A_2);
 
 
 C=P(:,4);
@@ -29,7 +31,11 @@ C=P(:,4);
 
 fun=@(u) CurveDerivsAlg2(n+1,p,U,C,u,d,2);
 C_1=integral(fun,0,1);
+fun=@(u) CurveDerivsAlg2(n+1,p,U,C,u,d,3);
+C_2=integral(fun,0,1);
+C_2=sqrt(C_2);
 
-Smooth_AC=A_1+C_1;
+
+Smooth_AC=A_1+A_2+C_1+C_2;
 
 

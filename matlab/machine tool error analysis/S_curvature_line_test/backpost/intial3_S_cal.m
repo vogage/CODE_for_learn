@@ -138,9 +138,9 @@ NC_code=ga_cal_code();
 %calculate the measure point deviation
 
 %output the result
- [difference_before,difference_after, first_deviation_before,first_deviation_after] ...
+ [difference_before,difference_after, deviation_before,deviation_after] ...
      =evalution_NC_code(NC1,NC_code);
  figure(1);plot(difference_before);hold on;plot(difference_after);
- figure(2);plot(first_deviation_before(:,1));hold on;plot(first_deviation_after(:,1));
- figure(3);plot(first_deviation_before(:,2));hold on;plot(first_deviation_after(:,2));
+ figure(2);plot(deviation_before(:,1));hold on;plot(deviation_after(:,1));
+ figure(3);plot(deviation_before(:,2));hold on;plot(deviation_after(:,2));
 

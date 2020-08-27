@@ -23,6 +23,7 @@ lb=x0-20;
 ub=x0+20;
 % NC_code=fminsearch(fun,x0);
 nonlcon = [];
+optimoptions(@fmincon,'MaxIterations',100);
 NC_code = fmincon(fun,x0,A,b,Aeq,beq,lb,ub,nonlcon)
 
  
