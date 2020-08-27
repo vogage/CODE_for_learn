@@ -51,7 +51,7 @@ end
                     j2=p-r;
                 end
                 for j=j1:1:j2
-                    a(s2+1,j+1)=(a(s1+1,j+1)-a(s1+1,j-1+1))/ndu(pk+1+1,rk+j+1);
+                    a(s2+1,j+1)=(a(s1+1,j+1)-a(s1+1,j-1+1))/ndu(pk+1,rk+j+1);
                     d=d+a(s2+1,j+1)*ndu(rk+j+1,pk+1);
                 end
                 if(r<=pk)
@@ -59,10 +59,9 @@ end
                     d=d+a(s2+1,k+1)*ndu(r+1,pk+1);
                 end
                 ders(k+1,r+1)=d;
-                j=s1;s1=s2;s2=j;% switch rows
+                j=s1;s1=s2;s2=j;
             end
         end
-        %Multiply through by the correct factors
         r=p;
         for k=1:1:n
             for j=0:1:p

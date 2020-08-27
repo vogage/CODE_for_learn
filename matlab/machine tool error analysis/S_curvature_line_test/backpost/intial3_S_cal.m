@@ -97,8 +97,8 @@ n=length(NC1);
 %calculate the K (stiffness) matrix for the smoothness
 %here only consider the AC influence
 %--------------------------------------------------------------------------
-n=length(P);
-K=zeros(n,n);
+% n=length(P);
+% K=zeros(n,n);
 
 %calculate the smoothness of A axis
 % syms u
@@ -135,5 +135,12 @@ K=zeros(n,n);
 %Smooth_AC=cal_smoothnes_of_AC_axis();
 
 NC_code=ga_cal_code();
+%calculate the measure point deviation
 
+%output the result
+ [difference_before,difference_after, first_deviation_before,first_deviation_after] ...
+     =evalution_NC_code(NC1,NC_code);
+ figure(1);plot(difference_before);hold on;plot(difference_after);
+ figure(2);plot(first_deviation_before(:,1));hold on;plot(first_deviation_after(:,1));
+ figure(3);plot(first_deviation_before(:,2));hold on;plot(first_deviation_after(:,2));
 

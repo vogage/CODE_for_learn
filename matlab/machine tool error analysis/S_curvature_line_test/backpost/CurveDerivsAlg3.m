@@ -1,5 +1,4 @@
-function C=CurveDerivsAlg2(n,p,U,P,u,d,order)
-%Compute curve suqare derivatives
+function C=CurveDerivsAlg3(n,p,U,P,u,d,order)
 %compute the curve square see CurveDerisAlg3
 %----------------------------------------------------
 %Input: n: the number of control points is n+1
@@ -17,8 +16,10 @@ du=min(d,p);
 %the u is a array
 n_u=length(u);
 CK=zeros(d,n_u);
-CK2=zeros(d,n_u); %the squre of deriva 
-%according the matlab integral calculate
+if(order>p)
+    C=zeros(size(u));return;
+end
+
 
 for i=1:n_u
     span=FindSpan(n,p,u(i),U);
@@ -29,8 +30,7 @@ for i=1:n_u
             CK(k+1,i)=CK(k+1,i)+nders(k+1,j+1)*P(span-p+j+1);
            
         end
-         CK2(k+1,i)= CK(k+1,i)*CK(k+1,i);
     end
 end   
 
-C=CK2(order,:);
+C=CK(order,:);

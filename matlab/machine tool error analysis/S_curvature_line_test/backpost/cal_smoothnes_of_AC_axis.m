@@ -7,7 +7,7 @@ A=P(:,5);
 n=length(P);
 p=3;
 d=2;
-fun=@(u) CurveDerivsAlg2(n+1,p,U,A,u,d,2);
+fun=@(u) CurveDerivsAlg2(n-1,p,U,A,u,d,2);
 %Compute curve derivatives
 %Input: n: the number of control points is n+1
 %           U:the knotes
@@ -16,7 +16,7 @@ fun=@(u) CurveDerivsAlg2(n+1,p,U,A,u,d,2);
 %Output: array CK[], where CK[k] is the kth derivative
 % the most d order of derivative
 % A_2=integral(fun,0,1)
-fun=@(u) CurveDerivsAlg2(n+1,p,U,A,u,d,1);
+%fun=@(u) CurveDerivsAlg2(n-1,p,U,A,u,d,1);
 A_1=integral(fun,0,1);
 
 
