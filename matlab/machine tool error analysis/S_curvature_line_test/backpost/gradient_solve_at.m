@@ -10,7 +10,7 @@ global tool_radius;
 
 iat=1;
 at_gradient=zeros(size(at));
-dif_distance=zeros(size(at));
+dif_distance=zeros(length(at),1);
  for i=1:length(at)
     x0=at(i,:);
  

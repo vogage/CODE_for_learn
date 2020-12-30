@@ -1,5 +1,7 @@
 function C=CurveDerivsAlg2(n,p,U,P,u,d,order)
-%Compute curve derivatives
+%Compute curve suqare derivatives
+%compute the curve square see CurveDerisAlg3
+%----------------------------------------------------
 %Input: n: the number of control points is n+1
 %           U:the knotes
 %           P:the control points
