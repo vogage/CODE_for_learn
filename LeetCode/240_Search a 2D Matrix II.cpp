@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<vector>
+#include<stack>
+#include<unordered_set>
 
 using namespace std;
 
@@ -96,6 +98,74 @@ public:
 	}
 
 };
+struct SimpleHash {
+	size_t operator()(const std::pair<int, int>& p) const {
+		return p.first ^ p.second;
+	}
+};
+
+class Solution4 {
+public:
+	bool searchMatrix(vector<vector<int>>& matrix, int target) {
+		if (matrix.size() == 0 || matrix[0].size() == 0) return false;
+		int m = matrix.size();
+		int n = matrix[0].size();
+		stack<pair<int, int>> st;
+		pair<int, int> p = { 0, 0 };
+		unordered_set<pair<int,int>,SimpleHash> pair_set;
+		st.push(p);
+		while (!st.empty()) {
+			pair<int, int> temp = st.top();
+			st.pop();
+			if (matrix[temp.first][temp.second] == target) return true;
+			pair<int, int> down(temp.first + 1, temp.second);
+			pair<int, int> right(temp.first, temp.second + 1);
+			
+
+			if (down.first < m&&matrix[down.first][down.second] <= target && pair_set.find(down) == pair_set.end()) {
+				st.push(down);
+				pair_set.insert(down);
+			}
+			
+			if (right.second < n&&matrix[right.first][right.second] <= target && pair_set.find(right) == pair_set.end()) {
+				st.push(right);
+		    	pair_set.insert(right);
+			}
+			
+		}
+		return false;
+	}
+};
+
+class Solution5 {
+public:
+	bool searchMatrix(vector<vector<int>>& matrix, int target) {
+		if (matrix.size() == 0 || matrix[0].size() == 0)return false;
+		int m = matrix.size();
+		int n= matrix[0].size();
+		int row = 0;
+		int col = n-1;
+		while (true) {
+			if (matrix[row][col] == target) return true;
+			else if (matrix[row][col] < target) {
+				row++;
+				if (row == m)return false;
+
+			}
+			else {
+				col--;
+				if (col < 0)return false;
+			}
+		}
+		return false;
+	}
+};
+
+
+
+
+
+
 int main() {
 
 	//[1, 4, 7, 11, 15],
@@ -103,7 +173,7 @@ int main() {
 	//	[3, 6, 9, 16, 22],
 	//	[10, 13, 14, 17, 24],
 	//	[18, 21, 23, 26, 30]
-	Solution3 mysolu;
+	Solution5 mysolu;
 	vector<vector<int>> input  ;
 	vector<int> temp = { 1, 4, 7, 11, 15 };
 	input.push_back(temp);

@@ -71,8 +71,9 @@ import re
 import unicodedata
 import numpy as np
 
-device=torch.device("cpu")
-
+# device=torch.device("cpu")
+USE_CUDA=torch.cuda.is_available()
+device=torch.device("cuda" if USE_CUDA else "cpu")
 MAX_LENGTH=10#Maximum sentence length
 
 #Default word tokens
