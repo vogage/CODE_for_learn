@@ -258,13 +258,19 @@ MAX_LENGTH=30 # Maximum Sentence length to consider
 # Turn a Unicode string to plain ACSII, thanks to consider
 # https:\\stackoverflow.com/a/518232/2009427
 
+# def unicodeToAscii(s):
+#     return ' '.join(
+#             c for c in unicodedata.normalize('NFD',s)
+#             if unicodedata.category(c)!='Mn'
+#             )
+
+#delete the whitespace
 def unicodeToAscii(s):
-     return ''.join(
-    
-            c for c in unicodedata.normalize('NFD',s)
-            if unicodedata.category(c)!='Mn'
-            )
-    
+    return ''.join(
+             c for c in unicodedata.normalize('NFD',s)
+             if unicodedata.category(c)!='Mn'
+             )
+  
 #Lowercase, trim, and remove non-letter characters
 def normalizeString(s):
     s=unicodeToAscii(s.lower().strip())
@@ -455,26 +461,12 @@ def batch2TrainData(voc,pair_batch):
         output_batch.append(pair[1])
     inp,lengths=inputVar(input_batch,voc)
     output,mask,max_target_len=outputVar(output_batch,voc)
-     # data=torch.cat((data,torch.zeros(MAX_LENGTH-data.size(0),batch_size
-     #                                     ,dtype=torch.long)),0)
-     #    targets=torch.cat((targets,torch.zeros(MAX_LENGTH-targets.size(0),batch_size
-     #                                           ,dtype=torch.long)),0)
-    inp=torch.cat((inp,torch.zeros(MAX_LENGTH-inp.size(0),inp.size(1),dtype=torch.long)),0)
-    output=torch.cat((output,torch.zeros(MAX_LENGTH-output.size(0),output.size(1),dtype=torch.long)),0)
-    
-    
-    
-    
-    #batch_train_data=torch.stack((inp,output),dim=0)
-    batch_train_data_length=lengths
-    #return inp,lengths,output,mask,max_target_len
-    return inp.to(device),output.to(device),batch_train_data_length.to(device)
-    #return inp,output,batch_train_data_length
+    return inp,lengths,output,mask,max_target_len
 
  #Example for validation
-#65small_batch_size=200
-# batches=batch2TrainData(voc,[random.choice(pairs) for _ in range(small_batch_size)])
-# input_variable,lengths,target_variable,mask,max_target_len=batches
+small_batch_size=64
+batches=batch2TrainData(voc,[random.choice(pairs) for _ in range(small_batch_size)])
+input_variable,lengths,target_variable,mask,max_target_len=batches
 
 
 # print("batches:",batches)
@@ -556,7 +548,7 @@ class TransformerModel(nn.Module):
         super(TransformerModel, self).__init__()
         from torch.nn import TransformerEncoder, TransformerEncoderLayer
         self.model_type = 'Transformer'
-        self.pos_encoder = PositionalEncoding(ninp, dropout)
+        self.pos_encoder = PositionalEncoding(ntoken,ninp,dropout)
         encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout)
         
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
@@ -593,13 +585,13 @@ class TransformerModel(nn.Module):
 
 
 class PositionalEncoding(nn.Module):
-
-    def __init__(self, d_model, dropout=0.1, max_len=MAX_LENGTH):
+# self.pos_encoder = PositionalEncoding(ntoken,ninp,dropout)
+    def __init__(self,ntoken, d_model, dropout=0.1):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        pe = torch.zeros(ntoken, d_model)
+        position = torch.arange(0, ntoken, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
@@ -620,11 +612,11 @@ def batchify(data, bsz):
     data = data.narrow(0, 0, nbatch * bsz)
     # Evenly divide the data across the bsz batches.
     data = data.view(bsz, -1).t().contiguous()
-    return data.to(device)
+    return data
 
 #batch_size = 20
-batch_size=64
-eval_batch_size = 16
+batch_size=small_batch_size
+eval_batch_size = 10
 #train_data = batchify(input_variable, batch_size)
 
 
@@ -637,13 +629,13 @@ n_iteration=1000
 # val_data = batchify(val_data, eval_batch_size)
 # test_data = batchify(test_data, eval_batch_size)
 
-# bptt=35
+bptt=35
 
-# def get_batch(source, i):
-#     seq_len = min(bptt, len(source) - 1 - i)
-#     data = source[i:i+seq_len]
-#     target = source[i+1:i+1+seq_len].reshape(-1)
-#     return data, target
+def get_batch(source, i):
+    seq_len = min(bptt, len(source) - 1 - i)
+    data = source[i:i+seq_len]
+    target = source[i+1:i+1+seq_len].reshape(-1)
+    return data, target
 
     
 ntokens = voc.num_words # the size of vocabulary
@@ -654,14 +646,13 @@ nlayers = 2 # the number of nn.TransformerEncoderLayer in nn.TransformerEncoder
 nhead = 4 # the number of heads in the multiheadattention models
 dropout = 0.2 # the dropout value
 model = TransformerModel(ntokens, emsize, nhead, nhid, nlayers, dropout)
-model.cuda()
-
-
+model.to(device)
+#voc.to(device)
+#pairs.to(device)
 
 criterion = nn.CrossEntropyLoss()
-criterion.cuda()
 #lr = 5.0 # learning rate
-lr=5
+lr=0.5#I think is sparse
 #梯度爆炸，loss 越来越多
 #最后分析原因是没有进行归一化处理
 #使用softmax处理之后就收敛了
@@ -686,9 +677,6 @@ def train():
     for _ in range(n_iteration)]
     
     
-   
-   
-    
     
     #src_mask = model.generate_square_subsequent_mask(bptt).to(device)
     
@@ -698,21 +686,21 @@ def train():
         #Extract fields from batch
         
         
-        #batch_train_data=torch.cat((inp,output,mask),dim=0)
-        input_variable=training_batch[0]
-        target_variable=training_batch[1]
+        
+        input_variable,lengths,target_variable,mask,max_target_len=training_batch
         #data, targets = get_batch(train_data, i)
         data=input_variable
         targets=target_variable
+
         #处理成长度相同 MAX_LENGTH 
         #yy=torch.cat((targets,torch.zeros(10-targets.size(0),20)),0)
         #torch.zeros()生成的默认张量数据类型，该处为float32,
         #但embedding需要的是long型，因此会报错
         #通过 AGU： dtype=torch.long进行设置
-        # data=torch.cat((data,torch.zeros(MAX_LENGTH-data.size(0),batch_size
-        #                                  ,dtype=torch.long)),0)
-        # targets=torch.cat((targets,torch.zeros(MAX_LENGTH-targets.size(0),batch_size
-        #                                        ,dtype=torch.long)),0)
+        data=torch.cat((data,torch.zeros(MAX_LENGTH-data.size(0),batch_size
+                                         ,dtype=torch.long)),0)
+        targets=torch.cat((targets,torch.zeros(MAX_LENGTH-targets.size(0),batch_size
+                                               ,dtype=torch.long)),0)
         # print(data.dtype)
         # print(targets.dtype)
                 
@@ -724,21 +712,24 @@ def train():
   #       loss.backward()
   #       return loss
   #   optimizer.step(closure)
-        # print(data.device)
-        # print(targets.device)
-        # # data.conda()
-        # # targets.conda()
+        #data.to(device)
+        #targets.to(device)
+        
+        optimizer.zero_grad()
+
+        src_mask = model.generate_square_subsequent_mask(data.size(0))
+        # data=data.long()
+        # src_mask.to(device)
         # data.to(device)
         # targets.to(device)
         # print(data.device)
         # print(targets.device)
-        optimizer.zero_grad()
-
-        src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
-        #src_mask = model.generate_square_subsequent_mask(data.size(0))
-        output = model(data.long(), src_mask)
+        # print(model.cuda())
+        output = model(data, src_mask)
+        #output.to(device)
 
         loss = criterion(output.reshape(-1,ntokens), targets.reshape(1,-1).squeeze(0))
+        #loss.to(device)
         #print(loss)
         loss.backward()
         optimizer.step()
@@ -750,10 +741,10 @@ def train():
         if iteration % log_interval == 0 and iteration > 0:
             cur_loss = total_loss / log_interval
             elapsed = time.time() - start_time
-            print('| epoch {:3d} | {:5d} batches | '
+            print('| epoch {:3d} | {:5d} percent_batches | '
                   'lr {:02.6f} | ms {:5.2f} | '
-                  'loss {:5.6f} | ppl {:8.6f}'.format(
-                    epoch, len(input_variable), scheduler.get_lr()[0],
+                  'loss {:5.2f} | ppl {:8.2f}'.format(
+                    epoch, iteration*100/n_iteration, scheduler.get_lr()[0],
                     elapsed * 1000 ,
                     cur_loss, math.exp(cur_loss)))
             total_loss = 0
@@ -799,8 +790,7 @@ def train():
 
 
 
-# def evaluate1(eval_model,input_variable,target_variable,mask):
-def evaluate1(eval_model,input_variable,target_variable):
+def evaluate1(eval_model,input_variable,target_variable,mask):
     eval_model.eval() # Turn on the evaluation mode
     # model.eval() is a kind of switch for some specific 
     # layers/parts of the model that behave differently 
@@ -836,16 +826,16 @@ def evaluate1(eval_model,input_variable,target_variable):
              #torch.zeros()生成的默认张量数据类型，该处为float32,
              #但embedding需要的是long型，因此会报错
              #通过 AGU： dtype=torch.long进行设置
-            # data=torch.cat((data,torch.zeros(MAX_LENGTH-data.size(0),batch_size
-            #                                  ,dtype=torch.long)),0)
-            # targets=torch.cat((targets,torch.zeros(MAX_LENGTH-targets.size(0),batch_size
-            #                                        ,dtype=torch.long)),0)
+            data=torch.cat((data,torch.zeros(MAX_LENGTH-data.size(0),batch_size
+                                             ,dtype=torch.long)),0)
+            targets=torch.cat((targets,torch.zeros(MAX_LENGTH-targets.size(0),batch_size
+                                                   ,dtype=torch.long)),0)
             # print(data.dtype)
             # print(targets.dtype)
             #optimizer.zero_grad()
     
-            src_mask = eval_model.generate_square_subsequent_mask(data.size(0)).to(device)
-            #src_mask = eval_model.generate_square_subsequent_mask(data.size(0))
+            src_mask = eval_model.generate_square_subsequent_mask(data.size(0))
+            
             
             
             
@@ -868,7 +858,6 @@ for epoch in range(1, epochs + 1):
  
     val_loss=0
     evaluate_batches=[batch2TrainData(voc,[random.choice(pairs) for _ in range(batch_size)])
-    
     for _ in range(evaluation_iteration)]
     for i in range(evaluation_iteration):
         evaluate_batch=evaluate_batches[i-1]
@@ -876,15 +865,12 @@ for epoch in range(1, epochs + 1):
         
         
         
-        #input_variable,lengths,target_variable,mask,max_target_len=evaluate_batch
-        input_variable=evaluate_batch[0]
-        target_variable=evaluate_batch[1]
-        
-        val_loss += evaluate1(model,input_variable,target_variable)
+        input_variable,lengths,target_variable,mask,max_target_len=evaluate_batch
+        val_loss += evaluate1(model,input_variable,target_variable,mask)
     val_loss=val_loss/evaluation_iteration
     print('-' * 89)
-    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.6f} | '
-          'valid ppl {:8.6f}'.format(epoch, (time.time() - epoch_start_time),
+    print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
+          'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
                                      val_loss, math.exp(val_loss)))
     print('-' * 89)
 

@@ -105,6 +105,7 @@ def batchify(data, bsz):
     data = data.view(bsz, -1).t().contiguous()
     return data.to(device)
 
+print(device)
 batch_size = 20
 eval_batch_size = 10
 train_data = batchify(train_data, batch_size)
@@ -129,6 +130,8 @@ dropout = 0.2 # the dropout value
 model = TransformerModel(ntokens, emsize, nhead, nhid, nlayers, dropout).to(device)
 
 criterion = nn.CrossEntropyLoss()
+print(model)
+print(criterion)
 lr = 5.0 # learning rate
 #https://pytorch.org/docs/stable/optim.html
 #Decays the learning rate of each parameter group by gamma every step_size epochs.

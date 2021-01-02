@@ -231,11 +231,54 @@ import torch.nn as nn
 # print(yy.size())
 # print(yy.dtype)
 
-m = nn.Softmax(dim=0)
-input = torch.randn(2, 3)
-output = m(input)
-print(input)
-print(output)
+# m = nn.Softmax(dim=0)
+# input = torch.randn(2, 3)
+# output = m(input)
+# print(input)
+# print(output)
 
+import unicodedata
 
+def unicodeToAscii(s):
+    return ''.join(
+             c for c in unicodedata.normalize('NFD',s)
+             if unicodedata.category(c)!='Mn'
+             )
 
+t="dfjladsjfaldfj dkafhaldkjf ASDADSADSAfdsgsdg@@@@@@@@@@@."
+print(unicodeToAscii(t))
+
+print(torch.cuda.is_available())
+# Python code to demonstrate copy operations 
+  
+# importing "copy" for copy operations 
+import copy 
+  
+# initializing list 1 
+li1 = [1, 2, [3,5], 4] 
+  
+# using deepcopy to deep copy  
+li2 = copy.deepcopy(li1) 
+  
+# original elements of list 
+print ("The original elements before deep copying") 
+for i in range(0,len(li1)): 
+    print (li1[i],end=" ") 
+  
+print("\r") 
+  
+# adding and element to new list 
+li2[2][0] = 7
+  
+# Change is reflected in l2  
+print ("The new list of elements after deep copying ") 
+for i in range(0,len( li1)): 
+    print (li2[i],end=" ") 
+  
+print("\r") 
+  
+# Change is NOT reflected in original list 
+# as it is a deep copy 
+print ("The original elements after deep copying") 
+for i in range(0,len( li1)): 
+    print (li1[i],end=" ") 
